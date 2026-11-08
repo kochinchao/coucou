@@ -502,6 +502,23 @@ const dayKey=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMont
 const fmtTime=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 
 /* =============== 資料（全部存在 LocalStorage 或沙盒記憶體） =============== */
+const S={
+  name:read('name',''),
+  points:read('points',120),
+  friends:read('friends',[]),
+  myItems:read('myItems',[]),
+  records:read('records',{}),
+  font:read('font','m'),
+  sound:read('sound',true),
+  myAway:read('myAway',false),
+  alerts:read('alerts',[])
+};
+let _tk=null,_T=null;
+function T(){const k=dayKey();if(_tk!==k){_tk=k;_T=read('tasks_'+k,{});_T.knocks=_T.knocks||[];_T.steps=_T.steps||0}return _T}
+function saveT(){write('tasks_'+_tk,_T)}
+
+// 相容舊版資料並初始化預設物品與鄰居
+(()=>{
   const oldInv=read('inventory',[]),oldDec=read('decor',[]);
   if((oldInv.length||oldDec.length)&&!S.myItems.length){
     [...oldDec,...oldInv].forEach((pid,idx)=>{
