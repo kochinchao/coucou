@@ -6,6 +6,10 @@
 <meta name="theme-color" content="#f6f1e7">
 <title>CouCou 左鄰右舍</title>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-functions-compat.js"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏘️%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -857,6 +861,7 @@ function renderAlert(){
 
 /* 好友：新增 / 開門 / 敲門 / 送禮 */
 function openAdd(){
+  if(typeof CLOUD!=='undefined'&&CLOUD.ready){dialog({kicker:'歡迎新鄰居',title:'邀請朋友來當鄰居',html:`<p style="color:var(--sub);margin-bottom:14px">按下按鈕，選一位 LINE 好友，對方點開連結就會成為您的鄰居。</p><button class="btn big" data-act="invite">📲 用 LINE 邀請朋友</button>`});return}
   const used=new Set(S.friends.map(f=>f.name));
   const chips=SAMPLE_NAMES.filter(n=>!used.has(n)).slice(0,6).map(n=>`<button data-act="addName" data-n="${n}">${n}</button>`).join('');
   dialog({kicker:'歡迎新鄰居',title:'邀請朋友來當鄰居',html:
@@ -926,6 +931,7 @@ function visitFriendRoom(id){
 function knock(id){
   const f=S.friends.find(x=>x.id===id);if(!f)return;
   SFX.knock();
+  cloudKnock(id).then(r=>{if(r.pushed)toast('📲 已傳到對方的 LINE！');else if(r.reason==='already')toast('今天已經敲過這扇門囉');else if(r.reason&&r.reason!=='offline')toast(r.reason)});
   const t=T(),first=!t.knocks.includes(id);let extra='';
   if(first&&t.knocks.length<PTS.knockMax){t.knocks.push(id);saveT();setTimeout(()=>addPoints(PTS.knock),450);extra=`<br>🎁 獲得 ${PTS.knock} 點！`}
   else if(first)extra='<br>今天的敲門點數已領滿，明天再來！';
@@ -1740,7 +1746,7 @@ const ACT={
   add:()=>{SFX.tap();openAdd()},
   addName:el=>addFriend(el.dataset.n),
   addTyped:()=>addFriend($('#friendName').value),
-  invite:()=>{SFX.tap();const text='一起來 CouCou 左鄰右舍當鄰居，互相報平安、玩遊戲！';if(navigator.share)navigator.share({title:'CouCou 左鄰右舍',text,url:location.href}).catch(()=>copyText(text));else copyText(text);toast('邀請文字已複製，可以貼到 LINE 給朋友')},
+  invite:()=>{SFX.tap();inviteViaLine()},
   home:()=>{SFX.tap();centerHome(true)},
   scroll:el=>{SFX.tap();$('#streetScroll').scrollBy({left:+el.dataset.d*170,behavior:'smooth'})},
   closeDlg:()=>{SFX.tap();closeDlg()},
@@ -1796,7 +1802,7 @@ const ACT={
   goShopFromHome:()=>{closeDlg();go('shop')},
   shopCat:el=>{curShopCat=el.dataset.c;SFX.tap();renderShop()},
   removeFriendAsk:()=>{$('#removeConfirmBox').style.display='block';SFX.tap()},
-  removeFriendDo:el=>{const f=S.friends.find(x=>x.id===el.dataset.id);if(f){S.friends=S.friends.filter(x=>x.id!==f.id);write('friends',S.friends);closeDlg();renderStreet(false);toast(`已移除鄰居「${f.name}」`)}},
+  removeFriendDo:el=>{const f=S.friends.find(x=>x.id===el.dataset.id);if(f){if(CLOUD.ready)callFn('removeFriend',{uid:f.id}).catch(()=>{});S.friends=S.friends.filter(x=>x.id!==f.id);write('friends',S.friends);closeDlg();renderStreet(false);toast(`已移除鄰居「${f.name}」`)}},
   stepSave:()=>setSteps($('#stepIn').value),
   stepAdd:()=>setSteps((T().steps||0)+1000),
   buy:el=>buy(el.dataset.id),
@@ -1848,6 +1854,7 @@ let rz;window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>
 
 /* 示範用：偶爾有鄰居上線 / 休息切換 */
 setInterval(()=>{
+  if(CLOUD.ready)return;
   if(!S.friends.length||!$('#page-village').classList.contains('active')||$('#dlg').classList.contains('show')||$('#gameOv').classList.contains('show'))return;
   const candidates=S.friends.filter(f=>!f.away&&(Date.now()-f.lastSeen)<24*3600000);
   if(!candidates.length)return;
@@ -1857,6 +1864,124 @@ setInterval(()=>{
   write('friends',S.friends);renderStreet(true);
   if(!st.online)toast(`💡 ${f.name}上線囉，快去他家串門子參觀吧！`);
 },28000);
+
+/* =============== 雲端（Firebase）=============== */
+// ① 到 Firebase 主控台 → 專案設定 → 您的應用程式（網頁）複製 config 貼這裡
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDmeZVsuMaC0Dy73novwsmzvoybxZGvc94",
+  authDomain: "coucou-13874.firebaseapp.com",
+  projectId: "coucou-13874",
+  storageBucket: "coucou-13874.firebasestorage.app",
+  messagingSenderId: "161861700564",
+  appId: "1:161861700564:web:56932d8b42d27ac8b06441"
+};
+
+let CLOUD = { ready: false, uid: null };
+let fbAuth, fbDb, fbFn;
+
+function cloudInit() {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  fbAuth = firebase.auth();
+  fbDb = firebase.firestore();
+  fbFn = firebase.app().functions('asia-east1');
+}
+const callFn = (name, data) => fbFn.httpsCallable(name)(data || {}).then(r => r.data);
+
+/* LINE 登入 → 換 Firebase 憑證 */
+async function cloudLogin() {
+  const idToken = liff.getIDToken();
+  if (!idToken) throw new Error('沒有 LINE ID Token');
+  const { token, name } = await callFn('lineLogin', { idToken });
+  await fbAuth.signInWithCustomToken(token);
+  CLOUD.uid = fbAuth.currentUser.uid;
+  CLOUD.ready = true;
+  S.name = name; write('name', name);
+  return CLOUD.uid;
+}
+
+/* 取得鄰居清單，轉成你畫面原本用的格式 */
+async function cloudLoadFriends() {
+  const rels = await fbDb.collection(`users/${CLOUD.uid}/friends`).get();
+  const list = [];
+  for (const d of rels.docs) {
+    const u = await fbDb.doc(`users/${d.id}`).get();
+    if (!u.exists) continue;
+    const x = u.data();
+    list.push({
+      id: d.id, name: x.name, lastSeen: x.lastSeen, away: !!x.away,
+      wall: x.wall, roof: x.roof, v: x.v || 0,
+      roomItems: d.data().roomItems || []
+    });
+  }
+  S.friends = list;
+  write('friends', list);
+  renderStreet(true);
+}
+
+/* 在線狀態：每 2 分鐘更新一次 lastSeen */
+function cloudHeartbeat() {
+  const beat = () => CLOUD.ready && fbDb.doc(`users/${CLOUD.uid}`)
+    .update({ lastSeen: Date.now(), away: !!S.myAway }).catch(() => {});
+  beat();
+  setInterval(beat, 120000);
+}
+
+/* 用 LINE 邀請朋友（取代原本 ACT.invite） */
+async function inviteViaLine() {
+  if (!CLOUD.ready) return toast('請先用 LINE 開啟（登入後才能邀請）');
+  const { code } = await callFn('createInvite');
+  const url = `https://liff.line.me/${LIFF_ID}?invite=${code}`;
+  const text = `${S.name || '我'}邀請您來 CouCou 左鄰右舍當鄰居，互相報平安、玩遊戲！\n${url}`;
+  if (liff.isApiAvailable('shareTargetPicker')) {
+    try { await liff.shareTargetPicker([{ type: 'text', text }]); toast('邀請已送出！'); return; }
+    catch (e) { /* 使用者取消 */ }
+  }
+  copyText(text); toast('邀請文字已複製，可以貼到 LINE 給朋友');
+}
+
+/* 朋友點邀請連結進來：自動互為鄰居 */
+async function cloudHandleInvite() {
+  const q = new URLSearchParams(location.search);
+  let code = q.get('invite');
+  if (!code && q.get('liff.state')) {
+    code = new URLSearchParams(q.get('liff.state').replace(/^\?/, '')).get('invite');
+  }
+  if (!code) return;
+  try {
+    const { friend } = await callFn('acceptInvite', { code });
+    toast(`🎉 ${friend.name} 成為您的鄰居了！`);
+    history.replaceState(null, '', location.pathname);
+  } catch (e) { toast(e.message || '邀請已失效'); }
+}
+
+/* 敲門：在你原本 knock(id) 函式裡呼叫它 */
+async function cloudKnock(friendId) {
+  if (!CLOUD.ready) return { pushed: false, reason: 'offline' };
+  try { return await callFn('knock', { toUid: friendId }); }
+  catch (e) { return { pushed: false, reason: e.message }; }
+}
+
+/* 取代原本的 initLine() —— 不論 App 內外都會導去登入 */
+async function initLineCloud() {
+  const isFramedPreview = (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
+  if (isFramedPreview && !/line/i.test(navigator.userAgent)) {
+    fallbackLocalInit();
+    return;
+  }
+  cloudInit();
+  try {
+    await liff.init({ liffId: LIFF_ID });
+    if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+    await cloudLogin();
+    renderHello(); lightUp();
+    await cloudHandleInvite();
+    await cloudLoadFriends();
+    cloudHeartbeat();
+  } catch (err) {
+    console.warn('雲端模式失敗，改用本地體驗：', err);
+    fallbackLocalInit();
+  }
+}
 
 /* =============== 啟動 (整合 LINE LIFF 登入與瀏覽器防呆降級) =============== */
 const LIFF_ID = "2012462937-yNSur707"; // 請確認 LINE Developers 後台 Channel 已發布且 Endpoint URL 相符
@@ -1908,7 +2033,7 @@ async function initLine() {
 
 document.documentElement.dataset.fs=S.font;
 syncPoints();renderHello();renderStreet(false);renderTasks();renderShop();renderGameHub();renderAlert();
-initLine(); // 啟動 LINE 登入（含自動降級保護）
+initLineCloud(); // 啟動 LINE 登入 + Firebase（含自動降級保護）
 </script>
 </body>
 </html>
