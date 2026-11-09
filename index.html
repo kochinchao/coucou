@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f6f1e7">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>CouCou 左鄰右舍</title>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -1928,15 +1931,44 @@ function cloudHeartbeat() {
 
 /* 用 LINE 邀請朋友（取代原本 ACT.invite） */
 async function inviteViaLine() {
-  if (!CLOUD.ready) return toast('請先用 LINE 開啟（登入後才能邀請）');
-  const { code } = await callFn('createInvite');
-  const url = `https://liff.line.me/${LIFF_ID}?invite=${code}`;
-  const text = `${S.name || '我'}邀請您來 CouCou 左鄰右舍當鄰居，互相報平安、玩遊戲！\n${url}`;
-  if (liff.isApiAvailable('shareTargetPicker')) {
-    try { await liff.shareTargetPicker([{ type: 'text', text }]); toast('邀請已送出！'); return; }
-    catch (e) { /* 使用者取消 */ }
+  if (typeof liff === "undefined") {
+    return toast("LINE 套件未載入，請重新整理頁面");
   }
-  copyText(text); toast('邀請文字已複製，可以貼到 LINE 給朋友');
+  if (!liff.isLoggedIn()) {
+    toast("正在引導 LINE 登入...");
+    liff.login({ redirectUri: location.href });
+    return;
+  }
+  if (!CLOUD.ready) {
+    toast("正在連線雲端資料庫...");
+    try {
+      await cloudLogin();
+    } catch(e) {
+      return toast("雲端登入失敗：" + (e.message || e));
+    }
+  }
+  try {
+    toast("⏳ 正在產生邀請連結...");
+    const { code } = await callFn("createInvite");
+    const url = "https://liff.line.me/" + LIFF_ID + "?invite=" + code;
+    const text = (S.name || "我") + " 邀請您來 CouCou 左鄰右舍當鄰居，互相報平安、玩遊戲！\n" + url;
+    if (liff.isApiAvailable("shareTargetPicker")) {
+      const res = await liff.shareTargetPicker([{ type: "text", text }]);
+      if (res) {
+        toast("✅ 邀請已送出！");
+        closeDlg();
+      }
+      return;
+    } else {
+      copyText(text);
+      toast("📋 邀請連結已複製！請直接貼到 LINE 聊天室傳給好友加入！");
+    }
+  } catch (e) {
+    console.error("邀請失敗：", e);
+    if (e && e.message && e.message.includes("cancel")) return;
+    copyText("https://liff.line.me/" + LIFF_ID);
+    toast("提示: " + (e.message || "請至 LINE 聊天室貼上連結給好友"));
+  }
 }
 
 /* 朋友點邀請連結進來：自動互為鄰居 */
@@ -1977,8 +2009,17 @@ async function initLineCloud() {
     await cloudHandleInvite();
     await cloudLoadFriends();
     cloudHeartbeat();
+    const stEl = document.getElementById("cloudStatus");
+    if (stEl) { stEl.textContent = "🟢 雲端連線"; stEl.style.background = "#d1e7dd"; stEl.style.color = "#0f5132"; }
   } catch (err) {
-    console.warn('雲端模式失敗，改用本地體驗：', err);
+    console.warn("雲端模式失敗，改用本地體驗：", err);
+    const stEl = document.getElementById("cloudStatus");
+    if (stEl) {
+      stEl.textContent = "🟡 點此登入LINE";
+      stEl.style.background = "#fff3cd";
+      stEl.style.color = "#664d03";
+      stEl.onclick = () => { if (typeof liff !== "undefined") liff.login({ redirectUri: location.href }); };
+    }
     fallbackLocalInit();
   }
 }
