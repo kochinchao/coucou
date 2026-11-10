@@ -40,12 +40,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;paddin
 button:disabled{cursor:default}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid #7fae83;outline-offset:2px}
 h1,h2,h3,p{margin:0}
-.app{max-width:720px;margin:auto;min-height:100vh;padding:0 16px 130px;position:relative}
+.app{max-width:720px;margin:auto;min-height:100vh;padding:0 12px 90px;position:relative}
 
 /* ===== 上方列 ===== */
-.top{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:74px;border-bottom:1px solid var(--line);flex-wrap:nowrap}
+.top{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:58px;border-bottom:1px solid var(--line);flex-wrap:nowrap}
 .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.05rem;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.brand-logo{flex:0 0 auto;height:56px;width:auto;display:block;filter:drop-shadow(0 2px 4px #51442a18)}
+.brand-logo{flex:0 0 auto;height:44px;width:auto;display:block;filter:drop-shadow(0 2px 4px #51442a18)}
 .logo-sub{color:var(--ink);font-weight:800;font-size:1.05rem}
 .topright{display:flex;align-items:center;gap:8px;flex:0 0 auto}
 .points{display:flex;align-items:center;gap:5px;min-height:44px;padding:0 12px;border-radius:99px;background:#fff0cf;border:2px solid #f1dfb5;color:#6e5118;font-weight:800;font-size:.95rem;white-space:nowrap}
@@ -61,22 +61,22 @@ h1,h2,h3,p{margin:0}
 .kicker{font-weight:800;color:var(--green);letter-spacing:.03em;font-size:.95rem}
 
 /* ===== 村莊首頁 ===== */
-.greeting{padding:16px 0 12px}
-.greeting h1{font-size:1.75rem;line-height:1.25;margin:2px 0 0;letter-spacing:-.01em}
+.greeting{padding:8px 0 6px}
+.greeting h1{font-size:1.45rem;line-height:1.2;margin:1px 0 0;letter-spacing:-.01em}
 .alert{display:none;gap:10px;align-items:flex-start;background:#fde9d6;border:2px solid #efb98e;border-radius:18px;padding:12px 14px;margin-bottom:14px;font-weight:500}
 .alert.show{display:flex}
 .alert span{flex:1}
 .alert button{background:#fff;border-radius:12px;padding:8px 12px;font-weight:800;min-height:44px}
 
 .street-card{border-radius:26px;background:var(--card);border:1px solid #e4ddcf;box-shadow:var(--shadow);overflow:hidden}
-.street-heading{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px 12px;padding:16px 16px 10px}
+.street-heading{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:10px 14px 6px}
 .street-heading h2{font-size:1.25rem;white-space:nowrap}
 .street-heading span{color:var(--sub);font-size:.88rem;font-weight:700;white-space:nowrap}
 .street-wrap{position:relative}
 .street-scroll{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#c8d3be transparent;-webkit-overflow-scrolling:touch}
-.scene{position:relative;width:max-content;min-width:100%;overflow:hidden;--sky1:#cfe6ea;--sky2:#f1f0dc;--walk:#d9ccab;--plate-h:82px}
+.scene{position:relative;width:max-content;min-width:100%;overflow:hidden;--sky1:#cfe6ea;--sky2:#f1f0dc;--walk:#d9ccab;--plate-h:70px}
 .scene.night{--sky1:#222d49;--sky2:#5a6a92;--walk:#b3a584}
-.row{position:relative;display:flex;justify-content:center;align-items:flex-end;padding:34px 12px 0;background:linear-gradient(to bottom,var(--sky1),var(--sky2) calc(100% - var(--plate-h)),var(--walk) calc(100% - var(--plate-h)),var(--walk))}
+.row{position:relative;display:flex;justify-content:center;align-items:flex-end;padding:18px 10px 0;background:linear-gradient(to bottom,var(--sky1),var(--sky2) calc(100% - var(--plate-h)),var(--walk) calc(100% - var(--plate-h)),var(--walk))}
 .row:after{content:'';position:absolute;left:0;right:0;bottom:var(--plate-h);height:4px;background:#0000001a;pointer-events:none}
 .cloud{z-index:1;position:absolute;font-size:2.6rem;opacity:.85;animation:drift 40s ease-in-out infinite alternate;pointer-events:none}
 .scene.night .cloud{opacity:.25}
@@ -222,9 +222,9 @@ h1,h2,h3,p{margin:0}
 .house.highlight{animation:housePulse 1.2s ease-in-out 2}
 @keyframes housePulse{50%{transform:translateY(-8px) scale(1.04)}}
 /* 搜尋好友列 */
-.search-bar{display:flex;gap:8px;align-items:center;padding:0 16px 10px}
+.search-bar{display:flex;gap:8px;align-items:center;padding:0 14px 6px}
 .search-input-wrap{position:relative;flex:1;min-width:0}
-.search-input-wrap input{width:100%;min-height:48px;border:2px solid #d8d1c0;border-radius:14px;padding:0 38px 0 12px;font:inherit;font-size:.95rem;background:#fff;text-overflow:ellipsis}
+.search-input-wrap input{width:100%;min-height:40px;border:2px solid #d8d1c0;border-radius:12px;padding:0 36px 0 12px;font:inherit;font-size:.92rem;background:#fff;text-overflow:ellipsis}
 .search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:#ece6d8;font-size:.9rem;font-weight:800;display:none}
 .search-clear.show{display:grid;place-items:center}
 .search-results{display:none;gap:8px;padding:0 16px 12px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
@@ -281,7 +281,7 @@ h1,h2,h3,p{margin:0}
 
 /* ===== 遊戲首頁 ===== */
 .gcard{display:flex;align-items:center;gap:12px;padding:16px;margin-bottom:14px;flex-wrap:wrap}
-.gi{flex:0 0 58px;height:58px;border-radius:18px;background:#f2eee2;display:grid;place-items:center;font-size:2rem}
+.gi{flex:0 0 56px;height:56px;border-radius:16px;background:#f2eee2;display:flex;align-items:center;justify-content:center;font-size:2.1rem;line-height:1;overflow:hidden;padding:2px}
 .gt{flex:1 1 170px;min-width:0}
 .gt h3{font-size:1.25rem}
 .gt p{color:var(--sub);font-size:.95rem;line-height:1.45}
@@ -415,8 +415,8 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 
 /* ===== 下方導覽 ===== */
 .nav{position:fixed;z-index:20;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:#fffdf4f2;backdrop-filter:blur(14px);border-top:1px solid #e0d8c8;padding:8px 8px max(8px,env(safe-area-inset-bottom))}
-.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:64px;border-radius:16px;font-size:.95rem;font-weight:800;color:#5f6a5c;gap:0}
-.nav button span{font-size:1.7rem;line-height:1.15}
+.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;border-radius:14px;font-size:.88rem;font-weight:800;color:#5f6a5c;gap:0}
+.nav button span{font-size:1.4rem;line-height:1.1}
 .nav button.active{background:var(--mint);color:var(--green-d)}
 @media(min-width:760px){.nav{left:50%;right:auto;width:560px;transform:translateX(-50%);bottom:12px;border:1px solid #e0d8c8;border-radius:24px;box-shadow:var(--shadow)}}
 
@@ -540,7 +540,7 @@ input,textarea{
 .app{
   min-height:100vh;
   min-height:100dvh;
-  padding:env(safe-area-inset-top,0px) 14px calc(116px + env(safe-area-inset-bottom,0px));
+  padding:env(safe-area-inset-top,0px) 12px calc(86px + env(safe-area-inset-bottom,0px));
 }
 .nav{
   -webkit-backdrop-filter:blur(14px);
@@ -568,19 +568,20 @@ input,textarea{
 .g-top{
   padding-top:calc(10px + env(safe-area-inset-top,0px));
 }
-/* 街道下方雙按鈕等寬不換行（解決手機上「＋ 邀請鄰居」斷成兩行的問題） */
+/* 街道下方雙按鈕等寬不換行且緊湊適應手機螢幕高 */
 .dock{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px;
-  padding:12px 14px;
+  gap:8px;
+  padding:8px 12px;
 }
 .dock .btn,.dock .btn.light{
   width:100%;
   min-width:0;
-  padding:0 10px;
+  min-height:46px;
+  padding:0 8px;
   white-space:nowrap;
-  font-size:1rem;
+  font-size:.98rem;
 }
 /* 街坊小舖卡片對齊與手機窄螢幕防跑版 */
 .product{
@@ -1452,17 +1453,34 @@ function selectRoomItem(uid) {
 function bindRoomDrag(){
   const room = $('#myRoomCanvas');
   if (!room) return;
-  let draggingEl = null, dragUid = null, rect = null, startX = 0, startY = 0, moved = false;
+  let draggingEl = null, dragUid = null, rect = null;
+  const activePointers = new Map();
+  let initDistance = 0;
+  let initScale = 1.0;
+
+  function getDistance(p1, p2) {
+    const dx = p1.clientX - p2.clientX;
+    const dy = p1.clientY - p2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 
   room.addEventListener('pointerdown', e => {
+    activePointers.set(e.pointerId, e);
+    
+    // 如果是雙指觸控（Pinch 縮放）
+    if (activePointers.size === 2) {
+      const pts = [...activePointers.values()];
+      initDistance = getDistance(pts[0], pts[1]);
+      const item = S.myItems.find(x => x.uid === selectedItemUid);
+      initScale = item ? (item.scale || 1.0) : 1.0;
+      return;
+    }
+
     const itemEl = e.target.closest('.room-item');
     if (!itemEl) return;
     e.preventDefault();
     e.stopPropagation();
     dragUid = itemEl.dataset.uid;
-    moved = false;
-    startX = e.clientX;
-    startY = e.clientY;
     selectRoomItem(dragUid);
     draggingEl = itemEl;
     rect = room.getBoundingClientRect();
@@ -1471,12 +1489,33 @@ function bindRoomDrag(){
   });
 
   room.addEventListener('pointermove', e => {
+    if (activePointers.has(e.pointerId)) {
+      activePointers.set(e.pointerId, e);
+    }
+
+    // 雙指直接縮放（直覺兩指捏放放大縮小）
+    if (activePointers.size === 2 && selectedItemUid && initDistance > 0) {
+      e.preventDefault();
+      e.stopPropagation();
+      const pts = [...activePointers.values()];
+      const dist = getDistance(pts[0], pts[1]);
+      const ratio = dist / initDistance;
+      const newScale = Math.max(0.4, Math.min(2.5, Math.round(initScale * ratio * 100) / 100));
+      const item = S.myItems.find(x => x.uid === selectedItemUid);
+      if (item) {
+        item.scale = newScale;
+        const dom = document.querySelector(`#myRoomCanvas [data-uid="${item.uid}"]`);
+        if (dom) dom.style.setProperty('--sc', newScale);
+        const lbl = document.getElementById('scaleLabel');
+        if (lbl) lbl.textContent = Math.round(newScale * 100) + '%';
+      }
+      return;
+    }
+
+    // 單指拖曳移動位置
     if (!draggingEl || !rect) return;
     e.preventDefault();
     e.stopPropagation();
-    if (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3) {
-      moved = true;
-    }
     const x = Math.max(10, Math.min(90, ((e.clientX - rect.left) / rect.width) * 100));
     const y = Math.max(15, Math.min(88, ((e.clientY - rect.top) / rect.height) * 100));
     draggingEl.style.left = x + '%';
@@ -1485,15 +1524,20 @@ function bindRoomDrag(){
     if (obj) { obj.x = Math.round(x); obj.y = Math.round(y); }
   });
 
-  const endDrag = e => {
-    if (!draggingEl) return;
-    try { draggingEl.releasePointerCapture(e.pointerId); } catch(err){}
-    draggingEl = null;
+  const endPointer = e => {
+    activePointers.delete(e.pointerId);
+    if (activePointers.size < 2) {
+      initDistance = 0;
+    }
+    if (draggingEl) {
+      try { draggingEl.releasePointerCapture(e.pointerId); } catch(err){}
+      draggingEl = null;
+    }
     write('myItems', S.myItems);
-    // 關鍵修正：拖曳結束時只存檔，絕不重新呼叫 openMine()，徹底消滅畫面狂跳的問題！
   };
-  room.addEventListener('pointerup', endDrag);
-  room.addEventListener('pointercancel', endDrag);
+
+  room.addEventListener('pointerup', endPointer);
+  room.addEventListener('pointercancel', endPointer);
 }
 /* =============== 任務與散步（未完成顯示進度，全部完成顯示「✓ 已完成」） =============== */
 function renderTasks(){
