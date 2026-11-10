@@ -970,20 +970,20 @@ const PRODUCTS=[
 ];
 let curShopCat='all';
 const HOUSE_THEMES = [
-  // 0. 經典粉藍（如同參考圖，無粗重線框，細膩優雅）
-  { wall:'#c1d7e1', roof:'#c7894a', roofLine:'#fffaf2', arch:'#f4eedf', door:'#ffffff', line:'#95abb7', roofOutline:'#a86d34', grass:'#9bb396', knob:'#cca152' },
-  // 1. 溫暖奶油杏黃
-  { wall:'#f5e5c7', roof:'#c26647', roofLine:'#fffcf5', arch:'#eee1c9', door:'#ffffff', line:'#d2bfa1', roofOutline:'#9e4a30', grass:'#9bb396', knob:'#d49244' },
-  // 2. 鼠尾草粉綠
-  { wall:'#c5d7c3', roof:'#aa7051', roofLine:'#f8faf4', arch:'#edece0', door:'#ffffff', line:'#9eb49c', roofOutline:'#885337', grass:'#7c9c76', knob:'#c99a4e' },
-  // 3. 柔和玫瑰粉橘
-  { wall:'#f2cfc3', roof:'#5a7684', roofLine:'#fff8f5', arch:'#faebe6', door:'#ffffff', line:'#d4aea0', roofOutline:'#415b67', grass:'#9db097', knob:'#cca152' },
-  // 4. 溫潤石洗灰紫
-  { wall:'#d5cbdc', roof:'#d49054', roofLine:'#fcf8f6', arch:'#eee9f1', door:'#ffffff', line:'#b2a4b9', roofOutline:'#b07038', grass:'#93a992', knob:'#c79344' },
-  // 5. 晴空柔粉青
-  { wall:'#bdd8d8', roof:'#b86e56', roofLine:'#f7fbfb', arch:'#e8f0f0', door:'#ffffff', line:'#95b3b3', roofOutline:'#944f3a', grass:'#83a68d', knob:'#cca152' },
-  // 6. 陽光溫暖鵝黃
-  { wall:'#fae8b7', roof:'#66827a', roofLine:'#fffcf0', arch:'#f5f0dc', door:'#ffffff', line:'#d9c38c', roofOutline:'#4b655e', grass:'#94ab87', knob:'#c98c36' }
+  // 0. 暖陽奶油黃（我家固定：明亮溫馨奶油黃牆面 ＋ 溫暖焦糖屋頂 ＋ 咖啡線框）
+  { wall:'#fdf1d6', roof:'#c97b47', roofLine:'#fffcf5', arch:'#f7e6ca', door:'#ffffff', line:'#4a3425', grass:'#8fa97c', knob:'#cca152' },
+  // 1. 溫馨蜜桃杏粉
+  { wall:'#fde9de', roof:'#cf6d52', roofLine:'#fffbf7', arch:'#fbe0d4', door:'#ffffff', line:'#4a3425', grass:'#8fa97c', knob:'#cca152' },
+  // 2. 溫暖香草米白
+  { wall:'#fbf6eb', roof:'#b86745', roofLine:'#fffdf9', arch:'#f3ecd9', door:'#ffffff', line:'#4a3425', grass:'#8fa97c', knob:'#cca152' },
+  // 3. 陽光朝氣金黃
+  { wall:'#fcedbe', roof:'#ad633d', roofLine:'#fffdf5', arch:'#f7e3ad', door:'#ffffff', line:'#4a3425', grass:'#8fa97c', knob:'#cca152' },
+  // 4. 柔和春日粉櫻
+  { wall:'#fae8e6', roof:'#bd7352', roofLine:'#fffbfb', arch:'#f6dcd8', door:'#ffffff', line:'#4a3425', grass:'#8fa97c', knob:'#cca152' },
+  // 5. 溫潤奶茶米褐
+  { wall:'#f6eee2', roof:'#b36142', roofLine:'#fffdfa', arch:'#eee3d3', door:'#ffffff', line:'#4a3425', grass:'#8fa97c', knob:'#cca152' },
+  // 6. 晨曦溫暖柔橙
+  { wall:'#fee2cf', roof:'#c26f4b', roofLine:'#fffbf7', arch:'#fad6bf', door:'#ffffff', line:'#4a3425', grass:'#8fa97c', knob:'#cca152' }
 ];
 const SAMPLE_NAMES=['阿玉姨','陳叔叔','美玲姐','老周','王媽媽','志明哥','小花阿姨','阿財伯'];
 
@@ -1041,9 +1041,8 @@ function closeDlg(){$('#dlg').classList.remove('show')}
 
 /* =============== 村莊：街道與房子 =============== */
 function buildHouseSVG(t, isMine, isOnline) {
-  // viewBox: 0 0 200 260
-  // 屋頂從 y=12 到 y=104
-  // 牆面從 y=104 到 y=260（底部完全齊平 260，絕不上下參差）
+  // 統一底部齊平 y=260
+  // 線框感：使用溫暖深咖啡色 strokeLine，線寬 2.8px，線條清晰童話手繪感
   return '<svg class="house-svg" viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">' +
     // 煙囪愛心炊煙
     '<g class="h-smoke">' +
@@ -1052,17 +1051,17 @@ function buildHouseSVG(t, isMine, isOnline) {
       '<path d="M158 8 C158 4 155 3 155 6 C155 8 158 10 158 10 C158 10 161 8 161 6 C161 3 158 4 158 8 Z" fill="#fbc7d2"/>' +
     '</g>' +
 
-    // 煙囪 (插畫無厚黑邊，色塊融合)
-    '<rect x="160" y="46" width="14" height="45" rx="1.5" fill="' + t.roof + '" stroke="' + t.roofOutline + '" stroke-width="1.5"/>' +
+    // 煙囪 (帶溫暖深咖啡手繪線框)
+    '<rect x="160" y="46" width="14" height="46" rx="1.5" fill="' + t.roof + '" stroke="' + t.line + '" stroke-width="2.6" stroke-linejoin="round"/>' +
 
-    // 牆面主體 (色塊無粗重黑外框，邊界自然輕柔)
-    '<rect x="0" y="104" width="200" height="156" fill="' + t.wall + '"/>' +
+    // 牆面主體 (明亮暖色牆面 ＋ 溫暖深咖啡手繪外框，滿版 0~200 緊密連貫)
+    '<rect x="0" y="104" width="200" height="156" fill="' + t.wall + '" stroke="' + t.line + '" stroke-width="2.8" stroke-linejoin="round"/>' +
 
-    // 屋頂三角形 (大陡斜屋頂)
-    '<path d="M100 12 L200 104 L0 104 Z" fill="' + t.roof + '"/>' +
+    // 屋頂三角形 (大陡斜屋頂 ＋ 溫暖深咖啡外框)
+    '<path d="M100 12 L200 104 L0 104 Z" fill="' + t.roof + '" stroke="' + t.line + '" stroke-width="2.8" stroke-linejoin="round"/>' +
 
-    // 屋頂手繪白橫條紋 (純色線條無黑邊，清新如插畫)
-    '<g stroke="' + t.roofLine + '" stroke-width="3.5" stroke-linecap="round" opacity="0.95">' +
+    // 屋頂手繪白橫條紋 (清晰層次)
+    '<g stroke="' + t.roofLine + '" stroke-width="3.2" stroke-linecap="round" opacity="0.95">' +
       '<line x1="86" y1="32" x2="114" y2="32"/>' +
       '<line x1="72" y1="50" x2="128" y2="50"/>' +
       '<line x1="58" y1="68" x2="142" y2="68"/>' +
@@ -1070,7 +1069,7 @@ function buildHouseSVG(t, isMine, isOnline) {
       '<line x1="26" y1="100" x2="174" y2="100"/>' +
     '</g>' +
 
-    // 二樓左窗 (四格方窗，咖啡色木外框 ＋ 關燈純黑玻璃 ＋ 白色高對比十字框)
+    // 二樓左窗 (四格方窗，咖啡色外框 ＋ 關燈純黑玻璃 ＋ 白色十字窗格)
     '<rect class="win-pane win-outer-frame" x="26" y="126" width="32" height="34" rx="2"/>' +
     '<line class="win-grid-line" x1="42" y1="126" x2="42" y2="160"/>' +
     '<line class="win-grid-line" x1="26" y1="143" x2="58" y2="143"/>' +
@@ -1085,11 +1084,11 @@ function buildHouseSVG(t, isMine, isOnline) {
     '<line class="win-grid-line" x1="158" y1="126" x2="158" y2="160"/>' +
     '<line class="win-grid-line" x1="142" y1="143" x2="174" y2="143"/>' +
 
-    // 一樓拱形大門 (大米白溫暖拱門，底緣剛好觸碰底線 y=260)
-    '<path d="M26 260 V206 C26 176 74 176 74 206 V260 Z" fill="' + t.arch + '"/>' +
-    '<path d="M35 260 V210 C35 186 65 186 65 210 V260 Z" fill="' + t.door + '"/>' +
+    // 一樓拱形大門 (大米白溫暖拱門 ＋ 咖啡手繪線框)
+    '<path d="M26 260 V206 C26 176 74 176 74 206 V260 Z" fill="' + t.arch + '" stroke="' + t.line + '" stroke-width="2.6" stroke-linejoin="round"/>' +
+    '<path d="M35 260 V210 C35 186 65 186 65 210 V260 Z" fill="' + t.door + '" stroke="' + t.line + '" stroke-width="2" stroke-linejoin="round"/>' +
     // 金色門把
-    '<circle cx="56" cy="235" r="4.5" fill="' + t.knob + '" stroke="#99702a" stroke-width="1.2"/>' +
+    '<circle cx="56" cy="235" r="4.5" fill="' + t.knob + '" stroke="' + t.line + '" stroke-width="1.5"/>' +
 
     // 一樓右側雙長型窗 (咖啡色外框 ＋ 關燈純黑玻璃)
     '<rect class="win-pane win-outer-frame" x="106" y="186" width="22" height="38" rx="2"/>' +
@@ -1108,7 +1107,7 @@ function buildHouseSVG(t, isMine, isOnline) {
     '</g>' +
 
     // 蜘蛛網
-    '<g class="cobweb-svg" stroke="#73685a" stroke-width="1.5" fill="none">' +
+    '<g class="cobweb-svg" stroke="#4a3425" stroke-width="1.8" fill="none">' +
       '<path d="M0 104 L40 120 M0 104 L26 140 M0 104 L12 152"/>' +
       '<path d="M16 104 Q16 116 0 120 M32 104 Q28 128 0 136"/>' +
       '<path d="M200 104 L166 119 M200 104 L176 138"/>' +
