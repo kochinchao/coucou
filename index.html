@@ -548,11 +548,26 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 .goal{background:#fff2cf;border-radius:14px;padding:10px 12px;font-weight:700;margin:10px 0 16px;color:#654a0e;line-height:1.6}
 .rec-new{background:#e2f0da;color:#2f5a36}
 .g-card .btn+.btn{margin-top:10px}
-.lvl{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:16px;margin-bottom:12px}
-.lvl .gi{font-size:1.8rem;font-weight:800;color:var(--green)}
-.lvl b{font-size:1.25rem;display:block}
-.lvl span{color:var(--sub);font-size:.95rem}
-.lvl em{display:block;font-style:normal;color:#7a5410;font-weight:700;font-size:.9rem}
+.lvl{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;margin-bottom:12px;border-radius:20px}
+.lvl-ico-box{
+  flex:0 0 62px;
+  height:62px;
+  border-radius:18px;
+  background:#f4eee1;
+  border:2px solid #e7ddca;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  overflow:hidden;
+}
+.lvl-emoji{font-size:1.75rem;line-height:1}
+.lvl-grid-tag{font-size:.72rem;font-weight:800;color:#6b522b;line-height:1}
+.lvl-info{flex:1;min-width:0}
+.lvl b{font-size:1.25rem;display:block;color:var(--ink);margin-bottom:2px}
+.lvl span{color:var(--sub);font-size:.92rem;display:block}
+.lvl em{display:block;font-style:normal;color:#7a5410;font-weight:700;font-size:.88rem;margin-top:2px}
 .mem-grid{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:8px;max-width:560px;margin:8px auto}
 .mc{position:relative;aspect-ratio:1/1.1;perspective:700px;touch-action:manipulation}
 .mc .in{position:absolute;inset:0;transition:transform .35s;transform-style:preserve-3d}
@@ -1456,7 +1471,6 @@ function openMine(){
   const selItem=S.myItems.find(x=>x.uid===selectedItemUid);
   const selProd=selItem?PRODUCTS.find(x=>x.id===selItem.id):null;
   const refund=selProd?Math.max(1,Math.round(selProd.price*0.3)):0;
-  const curScale = (selItem && selItem.scale) ? selItem.scale : 1.0;
 
   const itemsHTML=S.myItems.map(it=>{
     const p=PRODUCTS.find(x=>x.id===it.id)||{icon:'🎁',name:'物品'};
@@ -1465,9 +1479,9 @@ function openMine(){
   }).join('');
 
   dialog({kicker:'歡迎回家',title:`${S.name||'我'}的家`,html:
-   `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-      <span style="font-weight:800;color:var(--sub);font-size:.92rem">👆 點選物品可自由拖曳、放大縮小</span>
-      <button class="btn ${S.myAway?'orange':'light'}" style="min-height:40px;padding:0 12px;font-size:.88rem" data-act="toggleMyAway">${S.myAway?'🧳 外出中（點此改回在家）':'🏠 我在家（出遠門點此設外出）'}</button>
+   `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+      <span style="font-weight:800;color:var(--sub);font-size:.88rem">👆 單指拖曳移動・雙指張開縮放大小</span>
+      <button class="btn ${S.myAway?'orange':'light'}" style="min-height:38px;padding:0 12px;font-size:.86rem" data-act="toggleMyAway">${S.myAway?'🧳 外出中（點此改回在家）':'🏠 我在家（出遠門點此設外出）'}</button>
     </div>
     <div class="room" id="myRoomCanvas">${itemsHTML||'<div style="position:absolute;inset:0;display:grid;place-items:center;color:var(--sub)">屋裡還沒有物品，去街坊小舖逛逛吧！</div>'}</div>
     
@@ -1475,15 +1489,6 @@ function openMine(){
       <div class="item-ctrl-head">
         <span id="ctrlIcon" style="font-size:2.2rem">${selProd?selProd.icon:''}</span>
         <div><b id="ctrlName">${selProd?esc(selProd.name):''}</b><div id="ctrlRefund" style="font-size:.86rem;color:var(--sub)">${selProd?`原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)`:''}</div></div>
-      </div>
-      
-      <!-- 物品大小縮放控制 -->
-      <div class="scale-ctrl-row">
-        <span>物品大小：</span>
-        <button class="scale-btn" data-act="scaleItem" data-d="-0.15" aria-label="縮小">🔍 縮小</button>
-        <b id="scaleLabel" style="font-size:1.05rem;min-width:52px;text-align:center">${Math.round(curScale * 100)}%</b>
-        <button class="scale-btn" data-act="scaleItem" data-d="0.15" aria-label="放大">🔎 放大</button>
-        <button class="scale-btn" data-act="scaleItem" data-reset="1" style="font-size:.85rem;color:var(--sub)" aria-label="重設大小">還原</button>
       </div>
 
       <div class="item-ctrl-btns">
@@ -1495,7 +1500,7 @@ function openMine(){
         <div class="gifts">${S.friends.length?S.friends.map(f=>`<button class="btn" style="min-height:42px;padding:0 12px;font-size:.9rem" data-act="sendItemTo" data-uid="${selItem?selItem.uid:''}" data-fid="${f.id}">送給 ${esc(f.name)}</button>`).join(''):'<span class="small-note">還沒有鄰居，先去村莊邀請鄰居吧！</span>'}</div>
       </div>
     </div>
-    <button class="btn light big" style="margin-top:12px" data-act="goShopFromHome">🌷 去街坊小舖添購好禮 / 家具</button>`});
+    <button class="btn light big" style="margin-top:10px" data-act="goShopFromHome">🌷 去街坊小舖添購好禮 / 家具</button>`});
   bindRoomDrag();
 }
 function selectRoomItem(uid) {
@@ -1515,7 +1520,6 @@ function selectRoomItem(uid) {
   $('#ctrlIcon').textContent = selProd.icon;
   $('#ctrlName').textContent = selProd.name;
   $('#ctrlRefund').textContent = `原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)`;
-  $('#scaleLabel').textContent = Math.round(curScale * 100) + '%';
   const sendBtn = $('[data-act="showSendItem"]');
   if (sendBtn) sendBtn.dataset.uid = uid;
   const recycleBtn = $('[data-act="recycleItem"]');
@@ -1921,7 +1925,21 @@ function showResult({type,key,score,sub,title,extraHTML=''}){
 /* ---- 1. 美食翻牌 ---- */
 function memoryMenu(){
   curStop();setHead('🍜 美食翻牌',null);
-  $('#gBody').innerHTML=`<p class="hint">選一個難度：</p>`+[20,30,40].map(lv=>{const L=MEM_LEVELS[lv],r=getRec('memory'+lv);return `<button class="card lvl" data-act="memStart" data-lv="${lv}"><div class="gi">${L.cols}×${L.rows}</div><div><b>${L.label}</b><span>${lv} 張牌・${lv/2} 組美食</span><em>${r.plays?`🏆 最高 ${r.best} 分`:'還沒挑戰過'}</em></div></button>`}).join('');
+  const LV_ICONS = { 20: '🍙', 30: '🍜', 40: '🍱' };
+  $('#gBody').innerHTML=`<p class="hint">選一個難度：</p>`+[20,30,40].map(lv=>{
+    const L=MEM_LEVELS[lv], r=getRec('memory'+lv);
+    return `<button class="card lvl" data-act="memStart" data-lv="${lv}">
+      <div class="lvl-ico-box">
+        <span class="lvl-emoji">${LV_ICONS[lv]||'🍜'}</span>
+        <span class="lvl-grid-tag">${L.cols}×${L.rows}</span>
+      </div>
+      <div class="lvl-info">
+        <b>${L.label}</b>
+        <span>${lv} 張牌・${lv/2} 組美食</span>
+        <em>${r.plays?`🏆 最高 ${r.best} 分`:'還沒挑戰過'}</em>
+      </div>
+    </button>`;
+  }).join('');
 }
 function memoryPlay(lv){
   curStop();lastGame={type:'memory',lv};
