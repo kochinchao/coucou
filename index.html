@@ -61,8 +61,51 @@ h1,h2,h3,p{margin:0}
 .kicker{font-weight:800;color:var(--green);letter-spacing:.03em;font-size:.95rem}
 
 /* ===== 村莊首頁 ===== */
-.greeting{padding:8px 0 6px}
-.greeting h1{font-size:1.45rem;line-height:1.2;margin:1px 0 0;letter-spacing:-.01em}
+.greeting{padding:6px 0 6px}
+.greeting-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.greeting h1{font-size:1.35rem;line-height:1.2;margin:0;letter-spacing:-.01em}
+.greeting .kicker{font-size:.85rem;color:var(--sub);font-weight:700}
+
+/* 精簡頂列：搜尋與邀請鄰居同一排 */
+.street-bar-compact{display:flex;gap:8px;align-items:center;padding:10px 12px 4px}
+.street-bar-compact .search-input-wrap{flex:1;min-width:0}
+.street-bar-compact .search-input-wrap input{width:100%;min-height:42px;border:2px solid #d8d1c0;border-radius:12px;padding:0 34px 0 10px;font:inherit;font-size:.9rem;background:#fff;text-overflow:ellipsis}
+.invite-btn-top{flex:0 0 auto;min-height:42px;padding:0 14px;font-size:.92rem;border-radius:12px;white-space:nowrap}
+.street-status-strip{padding:0 14px 6px;font-size:.82rem;font-weight:700;color:var(--sub)}
+
+/* 房子下方名字與標籤空間微調，防止被遮切 */
+.house>.plate{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  height:var(--plate-h);
+  padding:4px 2px 2px;
+  width:100%;
+}
+.nm{
+  font-size:.95rem;
+  line-height:1.2;
+  font-weight:800;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#31261d;
+}
+.st{
+  font-style:normal;
+  font-size:.74rem;
+  line-height:1.2;
+  font-weight:800;
+  padding:1px 7px;
+  border-radius:99px;
+  white-space:nowrap;
+  max-width:96%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
 .alert{display:none;gap:10px;align-items:flex-start;background:#fde9d6;border:2px solid #efb98e;border-radius:18px;padding:12px 14px;margin-bottom:14px;font-weight:500}
 .alert.show{display:flex}
 .alert span{flex:1}
@@ -704,19 +747,22 @@ input,textarea{
     <!-- 村莊 -->
     <section class="page active" id="page-village">
       <div class="greeting">
-        <div class="kicker" id="today"></div>
-        <h1 id="hello">您好</h1>
+        <div class="greeting-row">
+          <h1 id="hello">您好</h1>
+          <span class="kicker" id="today"></span>
+        </div>
       </div>
       <div class="alert" id="alertBox" role="alert"><span id="alertText"></span><button data-act="dismissAlert">知道了</button></div>
       <div class="street-card">
-        <div class="street-heading"><h2>我們這條街</h2><span id="onlineSummary"></span></div>
-        <!-- 搜尋鄰居列 -->
-        <div class="search-bar">
+        <!-- 精簡合併：搜尋列與邀請按鈕同一排，去掉「我們這條街」 -->
+        <div class="street-bar-compact">
           <div class="search-input-wrap">
-            <input type="search" id="friendSearchIn" placeholder="🔍 搜尋鄰居名字…" aria-label="搜尋鄰居名字" autocomplete="off">
+            <input type="search" id="friendSearchIn" placeholder="🔍 搜尋鄰居…" aria-label="搜尋鄰居名字" autocomplete="off">
             <button class="search-clear" id="searchClearBtn" data-act="clearSearch" aria-label="清除搜尋">✕</button>
           </div>
+          <button class="btn invite-btn-top" data-act="add">＋ 邀請鄰居</button>
         </div>
+        <div class="street-status-strip"><span id="onlineSummary"></span></div>
         <div class="search-results" id="searchResults"></div>
         <div class="street-wrap" id="streetWrap">
           <button class="arrow l" data-act="scroll" data-d="-1" aria-label="往左看鄰居">◀</button>
@@ -733,8 +779,7 @@ input,textarea{
           <button class="arrow r" data-act="scroll" data-d="1" aria-label="往右看鄰居">▶</button>
         </div>
         <div class="dock">
-          <button class="btn" data-act="add">＋ 邀請鄰居</button>
-          <button class="btn light" data-act="home">🏠 回我家</button>
+          <button class="btn light" data-act="home" style="width:100%">🏠 回我家（我的房間）</button>
         </div>
       </div>
     </section>
