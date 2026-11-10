@@ -68,9 +68,28 @@ h1,h2,h3,p{margin:0}
 
 /* 精簡頂列：搜尋與邀請鄰居同一排 */
 .street-bar-compact{display:flex;gap:8px;align-items:center;padding:10px 12px 4px}
-.street-bar-compact .search-input-wrap{flex:1;min-width:0}
-.street-bar-compact .search-input-wrap input{width:100%;min-height:42px;border:2px solid #d8d1c0;border-radius:12px;padding:0 34px 0 10px;font:inherit;font-size:.9rem;background:#fff;text-overflow:ellipsis}
-.invite-btn-top{flex:0 0 auto;min-height:42px;padding:0 14px;font-size:.92rem;border-radius:12px;white-space:nowrap}
+.street-bar-compact .search-input-wrap{flex:1 1 auto;min-width:0}
+.street-bar-compact .search-input-wrap input{
+  width:100%;
+  min-height:42px;
+  border:2px solid #d8d1c0;
+  border-radius:12px;
+  padding:0 30px 0 10px;
+  font:inherit;
+  font-size:.88rem;
+  background:#fff;
+  white-space:nowrap;
+  overflow:visible;
+}
+.invite-btn-top{
+  flex:0 0 auto;
+  min-height:42px;
+  padding:0 12px;
+  font-size:.88rem;
+  font-weight:800;
+  border-radius:12px;
+  white-space:nowrap;
+}
 .street-status-strip{padding:0 14px 6px;font-size:.82rem;font-weight:700;color:var(--sub)}
 
 /* 房子下方名字與標籤空間微調，防止被遮切 */
@@ -284,7 +303,7 @@ h1,h2,h3,p{margin:0}
 .arrow{position:absolute;top:34%;z-index:5;width:46px;height:46px;border-radius:50%;background:#fffdf8ee;border:2px solid #cdc3af;font-size:1.15rem;box-shadow:0 4px 12px #0002;display:none}
 .arrow.l{left:6px}.arrow.r{right:6px}
 .street-wrap.has-scroll .arrow{display:grid;place-items:center}
-.dock{display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dock{display:none;display:flex;gap:10px;padding:14px;border-top:1px solid var(--line);flex-wrap:wrap}
 .dock .btn{flex:1;min-width:130px}.dock .btn.light{flex:0 0 auto}
 
 /* 共用按鈕 */
@@ -757,7 +776,7 @@ input,textarea{
         <!-- 精簡合併：搜尋列與邀請按鈕同一排，去掉「我們這條街」 -->
         <div class="street-bar-compact">
           <div class="search-input-wrap">
-            <input type="search" id="friendSearchIn" placeholder="🔍 搜尋鄰居…" aria-label="搜尋鄰居名字" autocomplete="off">
+            <input type="search" id="friendSearchIn" placeholder="🔍 搜尋鄰居" aria-label="搜尋鄰居名字" autocomplete="off">
             <button class="search-clear" id="searchClearBtn" data-act="clearSearch" aria-label="清除搜尋">✕</button>
           </div>
           <button class="btn invite-btn-top" data-act="add">＋ 邀請鄰居</button>
@@ -778,9 +797,7 @@ input,textarea{
           </div>
           <button class="arrow r" data-act="scroll" data-d="1" aria-label="往右看鄰居">▶</button>
         </div>
-        <div class="dock">
-          <button class="btn light" data-act="home" style="width:100%">🏠 回我家（我的房間）</button>
-        </div>
+
       </div>
     </section>
 
