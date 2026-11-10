@@ -34,6 +34,10 @@
 html{font-size:18px;height:100%}
 html[data-fs=l]{font-size:20px}
 html[data-fs=xl]{font-size:22px}
+/* 因應字體「大」與「特大」，自動加深房屋地基底座與名牌高度，徹底防止任何切字！ */
+.scene{--plate-h:78px}
+html[data-fs=l] .scene{--plate-h:90px}
+html[data-fs=xl] .scene{--plate-h:100px}
 body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',system-ui,sans-serif;line-height:1.55;overflow-x:hidden}
 body.noscroll{overflow:hidden}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
@@ -97,33 +101,38 @@ h1,h2,h3,p{margin:0}
   display:flex;
   flex-direction:column;
   align-items:center;
-  justify-content:center;
-  gap:2px;
+  justify-content:flex-start;
+  gap:3px;
   height:var(--plate-h);
-  padding:4px 2px 2px;
+  padding:6px 2px 4px;
   width:100%;
+  overflow:visible;
+  box-sizing:border-box;
 }
 .nm{
-  font-size:.95rem;
-  line-height:1.2;
+  font-size:.98rem;
+  line-height:1.3;
   font-weight:800;
   max-width:100%;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
   color:#31261d;
+  display:block;
+  padding:1px 0;
 }
 .st{
   font-style:normal;
-  font-size:.74rem;
-  line-height:1.2;
+  font-size:.76rem;
+  line-height:1.25;
   font-weight:800;
-  padding:1px 7px;
+  padding:2px 8px;
   border-radius:99px;
   white-space:nowrap;
   max-width:96%;
   overflow:hidden;
   text-overflow:ellipsis;
+  display:inline-block;
 }
 .alert{display:none;gap:10px;align-items:flex-start;background:#fde9d6;border:2px solid #efb98e;border-radius:18px;padding:12px 14px;margin-bottom:14px;font-weight:500}
 .alert.show{display:flex}
@@ -510,6 +519,10 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 .fld input{display:block;width:100%;margin-top:6px;min-height:56px;border:2px solid #d8d1c0;border-radius:14px;padding:0 14px;font:inherit;font-size:1.15rem;background:#fff}
 .seg{display:flex;gap:8px;margin-top:6px}
 .seg button{flex:1;min-height:52px;border-radius:14px;background:#f1eee5;font-weight:800;border:2px solid transparent}
+.seg button.seg-away-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;line-height:1.2;min-height:58px}
+.seg button.seg-away-btn span{font-size:1rem;font-weight:800}
+.seg button.seg-away-btn small{font-size:.82rem;font-weight:700;color:var(--sub);margin-top:2px}
+.seg button.seg-away-btn.on small{color:var(--green-d)}
 .seg button.on{background:var(--mint);border-color:var(--green)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
 .chips button{min-height:50px;padding:0 16px;border-radius:99px;background:var(--mint);font-weight:800;color:#2f4c36}
@@ -2344,7 +2357,7 @@ function coinPlay(){
 function openSettings(){
   dialog({kicker:'我的資料',title:'設定',html:
    `<label class="fld">怎麼稱呼您<input id="nameIn" maxlength="8" value="${esc(S.name)}" placeholder="例如：林奶奶"></label>
-    <div class="fld">我的狀態（出國或遠行可設為外出中，超過48小時也不會長蜘蛛網）<div class="seg"><button data-act="myAwaySet" data-v="0" class="${!S.myAway?'on':''}">💡 上線中(在家)</button><button data-act="myAwaySet" data-v="1" class="${S.myAway?'on':''}">🧳 外出中(遠行)</button></div></div>
+    <div class="fld">我的狀態（出國或遠行可設為外出中，超過48小時也不會長蜘蛛網）<div class="seg"><button data-act="myAwaySet" data-v="0" class="${!S.myAway?'on':''} seg-away-btn"><span>💡 上線中</span><small>（在家）</small></button><button data-act="myAwaySet" data-v="1" class="${S.myAway?'on':''} seg-away-btn"><span>🧳 外出中</span><small>（遠行）</small></button></div></div>
     <div class="fld">字體大小<div class="seg">${[['m','標準'],['l','大'],['xl','特大']].map(([k,l])=>`<button data-act="font" data-k="${k}" class="${S.font===k?'on':''}">${l}</button>`).join('')}</div></div>
     <div class="fld">互動音效<div class="seg"><button data-act="sound" data-v="1" class="${S.sound?'on':''}">🔊 開啟音效</button><button data-act="sound" data-v="0" class="${!S.sound?'on':''}">🔇 靜音</button></div></div>
     <button class="btn big" data-act="saveName">儲存</button>
