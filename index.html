@@ -225,11 +225,11 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 .cat-tab.on{background:var(--mint);color:var(--green-d);border-color:var(--green)}
 .shopgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 .product{padding:14px;display:flex;flex-direction:column;position:relative}
-.product .art{height:80px;display:grid;place-items:center;background:#f5f0e5;border-radius:16px;font-size:2.8rem}
+.product .art{height:92px;display:flex;align-items:center;justify-content:center;background:#f5f0e5;border-radius:16px;font-size:2.35rem;line-height:1;overflow:hidden;padding:8px}
 .product h3{font-size:1.05rem;margin:10px 0 2px}
 .product p{color:var(--sub);font-size:.9rem;flex:1;line-height:1.45}
 .price{color:#80581a;font-weight:800;margin:8px 0}
-.cat-tag{position:absolute;top:10px;right:10px;background:#e6efe0;color:#2f4c36;border-radius:99px;font-size:.75rem;font-weight:800;padding:2px 9px}
+.cat-tag{position:absolute;top:16px;right:16px;z-index:2;background:#e6efe0ee;color:#2f4c36;border-radius:99px;font-size:.75rem;font-weight:800;padding:2px 9px;line-height:1.3}
 .inv{padding:16px 18px;margin-top:14px}
 .inv h2{font-size:1.15rem;margin-bottom:10px}
 .pills{display:flex;flex-wrap:wrap;gap:8px}
@@ -262,9 +262,9 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 /* ===== 提示、對話框 ===== */
 .toast{position:fixed;z-index:80;left:50%;bottom:104px;transform:translate(-50%,16px);opacity:0;pointer-events:none;background:#2f4636;color:#fff;border-radius:16px;padding:14px 20px;box-shadow:0 8px 28px #0003;transition:.22s;width:max-content;max-width:calc(100% - 32px);text-align:center;font-weight:700;line-height:1.5}
 .toast.show{opacity:1;transform:translate(-50%,0)}
-.overlay{display:none;position:fixed;z-index:60;inset:0;background:#233329b3;align-items:flex-end;justify-content:center}
+.overlay{display:none;position:fixed;z-index:60;inset:0;background:#233329b3;align-items:center;justify-content:center;padding:16px}
 .overlay.show{display:flex}
-.dialog{width:min(560px,100%);max-height:92dvh;overflow:auto;border-radius:26px 26px 0 0;background:#fffdf8;padding:20px 18px max(22px,env(safe-area-inset-bottom));box-shadow:0 -10px 50px #0004;animation:up .22s ease-out}
+.dialog{width:min(520px,100%);max-height:85dvh;overflow:auto;border-radius:26px;background:#fffdf8;padding:18px 16px;box-shadow:0 12px 45px #0005;animation:up .2s ease-out}
 @media(min-width:620px){.overlay{align-items:center}.dialog{border-radius:26px}}
 @keyframes up{from{transform:translateY(30px);opacity:.4}}
 .dlg-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
@@ -391,11 +391,11 @@ input,textarea{
   z-index:110;
 }
 .dialog{
-  max-height:88vh;
-  max-height:88dvh;
+  max-height:84vh;
+  max-height:84dvh;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
-  padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px));
+  padding:16px 16px 18px;
 }
 .game-ov{
   height:100vh;
@@ -646,7 +646,7 @@ input,textarea{
     <!-- 小舖 -->
     <section class="page" id="page-shop">
       <button class="back" data-act="go" data-p="tasks">← 回任務</button>
-      <div class="shophead"><div><h1>街坊虛擬小舖 🌷</h1><p style="font-size:.9rem;color:var(--sub)">買花束、請喝咖啡、添購家具佈置家裡</p></div><div class="points" style="pointer-events:none">🪙 <span id="shopPoints">0</span> 點</div></div>
+      <div class="shophead"><div><h1>街坊小舖 🌷</h1><p style="font-size:.9rem;color:var(--sub)">買花束、請喝咖啡、添購家具佈置家裡</p></div><div class="points" style="pointer-events:none">🪙 <span id="shopPoints">0</span> 點</div></div>
       <div class="cat-tabs" id="shopTabs"></div>
       <div class="shopgrid" id="shopGrid"></div>
       <div class="card inv">
@@ -1219,20 +1219,19 @@ function askBuy(id){
   }
   SFX.tap();
   dialog({
-    kicker: '確認好禮兌換',
-    title: '兌換「' + p.name + '」？',
-    html: '<div style="text-align:center;padding:10px 0 6px">'+
-      '<div style="font-size:3.8rem;margin-bottom:8px">' + p.icon + '</div>'+
-      '<div style="font-weight:800;font-size:1.2rem;margin-bottom:4px">' + esc(p.name) + '</div>'+
-      '<p style="color:var(--sub);font-size:0.95rem;margin-bottom:14px">' + esc(p.desc) + '</p>'+
-      '<div style="display:inline-flex;align-items:center;gap:6px;background:#fff0cf;border:2px solid #f1dfb5;border-radius:14px;padding:8px 18px;font-weight:800;color:#6e5118;font-size:1.15rem;margin-bottom:8px">'+
-        '🪙 消耗 ' + p.price.toLocaleString() + ' 點'+
+    kicker: '',
+    title: '確認兌換好禮',
+    html: '<div style="display:flex;align-items:center;gap:14px;background:#f7f3e8;border:1.5px solid #e5dcc8;border-radius:18px;padding:12px 14px;margin:4px 0 12px">'+
+      '<div style="width:68px;height:68px;flex:0 0 68px;border-radius:14px;background:#fffdf8;display:flex;align-items:center;justify-content:center;font-size:2.4rem;line-height:1;overflow:hidden">' + p.icon + '</div>'+
+      '<div style="flex:1;min-width:0;text-align:left">'+
+        '<div style="font-weight:800;font-size:1.15rem;line-height:1.25;color:var(--ink)">' + esc(p.name) + '</div>'+
+        '<div style="color:#6e5118;font-weight:800;font-size:1rem;margin-top:4px">🪙 扣除 ' + p.price.toLocaleString() + ' 點</div>'+
+        '<div style="color:var(--sub);font-size:0.86rem;margin-top:2px">兌換後剩餘 <b>' + (S.points-p.price).toLocaleString() + '</b> 點（自動放進我家）</div>'+
       '</div>'+
-      '<p style="color:var(--sub);font-size:0.88rem;margin:4px 0 0">兌換後將剩餘 <b>' + (S.points-p.price).toLocaleString() + '</b> 點，並自動擺進您的客廳中。</p>'+
     '</div>'+
-    '<div style="display:flex;gap:10px;margin-top:18px">'+
-      '<button class="btn light big" style="flex:1" data-act="closeDlg">取消</button>'+
-      '<button class="btn orange big" style="flex:1" data-act="confirmBuy" data-id="' + p.id + '">確定兌換</button>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+      '<button class="btn light" style="width:100%;min-height:52px" data-act="closeDlg">取消</button>'+
+      '<button class="btn orange" style="width:100%;min-height:52px" data-act="confirmBuy" data-id="' + p.id + '">確定兌換</button>'+
     '</div>'
   });
 }
