@@ -70,9 +70,19 @@ h1,h2,h3,p{margin:0}
 .greeting h1{font-size:1.35rem;line-height:1.2;margin:0;letter-spacing:-.01em}
 .greeting .kicker{font-size:.85rem;color:var(--sub);font-weight:700}
 
-/* 精簡頂列：搜尋與邀請鄰居同一排 */
-.street-bar-compact{display:flex;gap:8px;align-items:center;padding:10px 12px 4px}
-.street-bar-compact .search-input-wrap{flex:1 1 auto;min-width:0}
+/* 精簡頂列：搜尋與邀請鄰居同一排，比例 2:1 */
+.street-bar-compact{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:8px;
+  align-items:center;
+  padding:10px 12px 4px;
+}
+.street-bar-compact .search-input-wrap{
+  position:relative;
+  width:100%;
+  min-width:0;
+}
 .street-bar-compact .search-input-wrap input{
   width:100%;
   min-height:42px;
@@ -84,15 +94,20 @@ h1,h2,h3,p{margin:0}
   background:#fff;
   white-space:nowrap;
   overflow:visible;
+  box-sizing:border-box;
 }
 .invite-btn-top{
-  flex:0 0 auto;
+  width:100%;
   min-height:42px;
-  padding:0 12px;
-  font-size:.88rem;
+  padding:0 4px;
+  font-size:.92rem;
   font-weight:800;
   border-radius:12px;
   white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
 }
 .street-status-strip{padding:0 14px 6px;font-size:.82rem;font-weight:700;color:var(--sub)}
 
@@ -801,13 +816,13 @@ input,textarea{
       </div>
       <div class="alert" id="alertBox" role="alert"><span id="alertText"></span><button data-act="dismissAlert">知道了</button></div>
       <div class="street-card">
-        <!-- 精簡合併：搜尋列與邀請按鈕同一排，去掉「我們這條街」 -->
+        <!-- 精簡合併：搜尋列與邀請按鈕同一排，去掉「我們這條街」，比例 2:1 -->
         <div class="street-bar-compact">
           <div class="search-input-wrap">
             <input type="search" id="friendSearchIn" placeholder="🔍 搜尋鄰居" aria-label="搜尋鄰居名字" autocomplete="off">
             <button class="search-clear" id="searchClearBtn" data-act="clearSearch" aria-label="清除搜尋">✕</button>
           </div>
-          <button class="btn invite-btn-top" data-act="add">＋ 邀請鄰居</button>
+          <button class="btn invite-btn-top" data-act="add">＋ 邀請</button>
         </div>
         <div class="street-status-strip"><span id="onlineSummary"></span></div>
         <div class="search-results" id="searchResults"></div>
