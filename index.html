@@ -329,7 +329,19 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 .back{display:inline-flex;align-items:center;min-height:48px;padding:0 14px;border-radius:14px;background:var(--mint);font-weight:800;color:#2f4c36;margin-top:14px}
 
 /* ===== 房間互動（我的家 & 鄰居家串門子：純淨無框、無文字、支援放大縮小） ===== */
-.room{border-radius:20px;height:260px;background:linear-gradient(#f4ebd9 0 65%,#d8b087 65%);position:relative;overflow:hidden;border:3px solid #d8cbb3;touch-action:none;user-select:none}
+.room{
+  border-radius:20px;
+  height:260px;
+  background:linear-gradient(#f4ebd9 0 65%,#d8b087 65%);
+  position:relative;
+  overflow:hidden;
+  border:3px solid #d8cbb3;
+  touch-action:none;
+  -webkit-touch-callout:none;
+  user-select:none;
+  -webkit-user-select:none;
+  overscroll-behavior:none;
+}
 .room:before{content:'';position:absolute;left:8%;top:18px;width:68px;height:68px;border:6px solid #fff8;background:#ffd45e;border-radius:8px;box-shadow:0 0 22px #ffcf5a;pointer-events:none}
 .room:after{content:'';position:absolute;left:0;right:0;top:65%;height:4px;background:#b98b60;pointer-events:none}
 .room-item{
@@ -339,26 +351,31 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
   align-items:center;
   justify-content:center;
   cursor:grab;
-  padding:0;
+  padding:4px;
   border:none;
   background:none;
   z-index:2;
-  transition:filter .15s, transform .08s;
   touch-action:none;
-}
-.room-item:active{cursor:grabbing;z-index:10}
-/* 選取中時只有乾淨柔和的橘黃色光芒，完全沒有生硬方框與白卡片！ */
-.room-item.sel{
-  z-index:9;
-  filter:drop-shadow(0 0 10px #bf5f35) drop-shadow(0 6px 12px rgba(0,0,0,0.3));
-}
-.room-item .ri-ico{
-  font-size:3rem;
-  line-height:1;
-  display:block;
-  filter:drop-shadow(0 4px 6px rgba(0,0,0,0.18));
+  -webkit-touch-callout:none;
   user-select:none;
   -webkit-user-select:none;
+  pointer-events:auto;
+}
+.room-item:active{cursor:grabbing;z-index:10}
+/* 選取中時只有乾淨柔和的橘黃色光暈，完全沒有生硬方框與白卡片！ */
+.room-item.sel{
+  z-index:9;
+  filter:drop-shadow(0 0 8px #bf5f35) drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+}
+/* 物品適度縮小（原 3rem 太大，改為 2.1rem，大小剛好適合房間擺設） */
+.room-item .ri-ico{
+  font-size:2.1rem;
+  line-height:1;
+  display:block;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,0.18));
+  user-select:none;
+  -webkit-user-select:none;
+  pointer-events:none;
 }
 /* 徹底移除文字說明與框框 */
 .room-item .ri-tag{display:none!important}
@@ -1377,9 +1394,12 @@ function openMine(){
       <button class="btn ${S.myAway?'orange':'light'}" style="min-height:40px;padding:0 12px;font-size:.88rem" data-act="toggleMyAway">${S.myAway?'🧳 外出中（點此改回在家）':'🏠 我在家（出遠門點此設外出）'}</button>
     </div>
     <div class="room" id="myRoomCanvas">${itemsHTML||'<div style="position:absolute;inset:0;display:grid;place-items:center;color:var(--sub)">屋裡還沒有物品，去街坊小舖逛逛吧！</div>'}</div>
-    ${selProd?`
-    <div class="item-ctrl">
-      <div class="item-ctrl-head"><span style="font-size:2.2rem">${selProd.icon}</span><div><b>${esc(selProd.name)}</b><div style="font-size:.86rem;color:var(--sub)">原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)</div></div></div>
+    
+    <div class="item-ctrl" id="itemCtrlBox" style="display:${selProd?'block':'none'}">
+      <div class="item-ctrl-head">
+        <span id="ctrlIcon" style="font-size:2.2rem">${selProd?selProd.icon:''}</span>
+        <div><b id="ctrlName">${selProd?esc(selProd.name):''}</b><div id="ctrlRefund" style="font-size:.86rem;color:var(--sub)">${selProd?`原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)`:''}</div></div>
+      </div>
       
       <!-- 物品大小縮放控制 -->
       <div class="scale-ctrl-row">
@@ -1391,51 +1411,90 @@ function openMine(){
       </div>
 
       <div class="item-ctrl-btns">
-        <button class="btn light" data-act="showSendItem" data-uid="${selItem.uid}">🎁 送給鄰居</button>
-        <button class="btn orange" data-act="recycleItem" data-uid="${selItem.uid}">♻️ 回收換 +${refund} 點</button>
+        <button class="btn light" data-act="showSendItem" data-uid="${selItem?selItem.uid:''}">🎁 送給鄰居</button>
+        <button class="btn orange" data-act="recycleItem" data-uid="${selItem?selItem.uid:''}">♻️ 回收換 +${refund} 點</button>
       </div>
       <div id="sendPickerBox" style="display:none;margin-top:10px;padding-top:10px;border-top:1px dashed #ccc">
         <div style="font-weight:700;margin-bottom:6px;font-size:.92rem">選擇要送給哪位鄰居：</div>
-        <div class="gifts">${S.friends.length?S.friends.map(f=>`<button class="btn" style="min-height:42px;padding:0 12px;font-size:.9rem" data-act="sendItemTo" data-uid="${selItem.uid}" data-fid="${f.id}">送給 ${esc(f.name)}</button>`).join(''):'<span class="small-note">還沒有鄰居，先去村莊邀請鄰居吧！</span>'}</div>
+        <div class="gifts">${S.friends.length?S.friends.map(f=>`<button class="btn" style="min-height:42px;padding:0 12px;font-size:.9rem" data-act="sendItemTo" data-uid="${selItem?selItem.uid:''}" data-fid="${f.id}">送給 ${esc(f.name)}</button>`).join(''):'<span class="small-note">還沒有鄰居，先去村莊邀請鄰居吧！</span>'}</div>
       </div>
-    </div>`:''}
+    </div>
     <button class="btn light big" style="margin-top:12px" data-act="goShopFromHome">🌷 去街坊小舖添購好禮 / 家具</button>`});
   bindRoomDrag();
 }
-function bindRoomDrag(){
-  const room=$('#myRoomCanvas');if(!room)return;
-  let draggingEl=null,dragUid=null,rect=null;
-  room.addEventListener('pointerdown',e=>{
-    const itemEl=e.target.closest('.room-item');
-    if(!itemEl)return;
-    e.preventDefault();
-    dragUid=itemEl.dataset.uid;
-    selectedItemUid=dragUid;
-    $$('#myRoomCanvas .room-item').forEach(el=>el.classList.toggle('sel',el===itemEl));
-    draggingEl=itemEl;
-    rect=room.getBoundingClientRect();
-    itemEl.setPointerCapture(e.pointerId);
-    SFX.tap();
-  });
-  room.addEventListener('pointermove',e=>{
-    if(!draggingEl||!rect)return;
-    const x=Math.max(12,Math.min(88,((e.clientX-rect.left)/rect.width)*100));
-    const y=Math.max(20,Math.min(88,((e.clientY-rect.top)/rect.height)*100));
-    draggingEl.style.left=x+'%';
-    draggingEl.style.top=y+'%';
-    const obj=S.myItems.find(it=>it.uid===dragUid);
-    if(obj){obj.x=Math.round(x);obj.y=Math.round(y)}
-  });
-  const endDrag=()=>{
-    if(!draggingEl)return;
-    draggingEl=null;
-    write('myItems',S.myItems);
-    openMine();
-  };
-  room.addEventListener('pointerup',endDrag);
-  room.addEventListener('pointercancel',endDrag);
+function selectRoomItem(uid) {
+  selectedItemUid = uid;
+  $$('#myRoomCanvas .room-item').forEach(el => el.classList.toggle('sel', el.dataset.uid === uid));
+  const selItem = S.myItems.find(x => x.uid === uid);
+  const selProd = selItem ? PRODUCTS.find(x => x.id === selItem.id) : null;
+  const ctrlBox = $('#itemCtrlBox');
+  if (!ctrlBox) return;
+  if (!selProd) {
+    ctrlBox.style.display = 'none';
+    return;
+  }
+  ctrlBox.style.display = 'block';
+  const refund = Math.max(1, Math.round(selProd.price * 0.3));
+  const curScale = selItem.scale || 1.0;
+  $('#ctrlIcon').textContent = selProd.icon;
+  $('#ctrlName').textContent = selProd.name;
+  $('#ctrlRefund').textContent = `原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)`;
+  $('#scaleLabel').textContent = Math.round(curScale * 100) + '%';
+  const sendBtn = $('[data-act="showSendItem"]');
+  if (sendBtn) sendBtn.dataset.uid = uid;
+  const recycleBtn = $('[data-act="recycleItem"]');
+  if (recycleBtn) {
+    recycleBtn.dataset.uid = uid;
+    recycleBtn.innerHTML = `♻️ 回收換 +${refund} 點`;
+  }
 }
 
+function bindRoomDrag(){
+  const room = $('#myRoomCanvas');
+  if (!room) return;
+  let draggingEl = null, dragUid = null, rect = null, startX = 0, startY = 0, moved = false;
+
+  room.addEventListener('pointerdown', e => {
+    const itemEl = e.target.closest('.room-item');
+    if (!itemEl) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragUid = itemEl.dataset.uid;
+    moved = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    selectRoomItem(dragUid);
+    draggingEl = itemEl;
+    rect = room.getBoundingClientRect();
+    try { itemEl.setPointerCapture(e.pointerId); } catch(err){}
+    SFX.tap();
+  });
+
+  room.addEventListener('pointermove', e => {
+    if (!draggingEl || !rect) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (Math.abs(e.clientX - startX) > 3 || Math.abs(e.clientY - startY) > 3) {
+      moved = true;
+    }
+    const x = Math.max(10, Math.min(90, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(15, Math.min(88, ((e.clientY - rect.top) / rect.height) * 100));
+    draggingEl.style.left = x + '%';
+    draggingEl.style.top = y + '%';
+    const obj = S.myItems.find(it => it.uid === dragUid);
+    if (obj) { obj.x = Math.round(x); obj.y = Math.round(y); }
+  });
+
+  const endDrag = e => {
+    if (!draggingEl) return;
+    try { draggingEl.releasePointerCapture(e.pointerId); } catch(err){}
+    draggingEl = null;
+    write('myItems', S.myItems);
+    // 關鍵修正：拖曳結束時只存檔，絕不重新呼叫 openMine()，徹底消滅畫面狂跳的問題！
+  };
+  room.addEventListener('pointerup', endDrag);
+  room.addEventListener('pointercancel', endDrag);
+}
 /* =============== 任務與散步（未完成顯示進度，全部完成顯示「✓ 已完成」） =============== */
 function renderTasks(){
   const t=T(),steps=t.steps||0;
@@ -2263,21 +2322,20 @@ const ACT={
     toast(`🎁 已將「${p?p.name:'好禮'}」送給 ${f.name}！`);
   },
   scaleItem:el=>{
-    const item = S.myItems.find(x=>x.uid===selectedItemUid);
-    if(!item)return;
-    if(el.dataset.reset){
+    const item = S.myItems.find(x => x.uid === selectedItemUid);
+    if (!item) return;
+    if (el.dataset.reset) {
       item.scale = 1.0;
-    }else{
+    } else {
       const d = parseFloat(el.dataset.d) || 0;
       const cur = item.scale || 1.0;
-      item.scale = Math.max(0.5, Math.min(2.2, Math.round((cur + d) * 100) / 100));
+      item.scale = Math.max(0.4, Math.min(2.5, Math.round((cur + d) * 100) / 100));
     }
     write('myItems', S.myItems);
-    // 更新畫面上該物品的 scale
-    const dom = $(`#myRoomCanvas [data-uid="${item.uid}"]`);
-    if(dom) dom.style.setProperty('--sc', item.scale);
-    const lbl = $('#scaleLabel');
-    if(lbl) lbl.textContent = Math.round(item.scale * 100) + '%';
+    const dom = document.querySelector(`#myRoomCanvas [data-uid="${item.uid}"]`);
+    if (dom) dom.style.setProperty('--sc', item.scale);
+    const lbl = document.getElementById('scaleLabel');
+    if (lbl) lbl.textContent = Math.round(item.scale * 100) + '%';
     SFX.tap();
   },
   recycleItem:el=>{
