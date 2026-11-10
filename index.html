@@ -85,38 +85,44 @@ h1,h2,h3,p{margin:0}
 @keyframes drift{to{transform:translateX(40px)}}
 .tree{flex:0 0 auto;align-self:flex-end;font-size:3.2rem;line-height:1;margin:0 4px calc(var(--plate-h) - 6px);position:relative;z-index:0}
 
-/* ===== 北歐繪本風相連街屋（彼此無縫接連、咖啡色溫暖窗框、高對比開關燈） ===== */
+/* ===== 北歐繪本風相連街屋（平整對齊、無厚重黑線、關燈黑窗高對比） ===== */
 .house{
-  --hw:7.2rem;
+  --hw:7.8rem;
   position:relative;
   display:flex;
   flex-direction:column;
   justify-content:flex-end;
   flex:0 0 var(--hw);
   width:var(--hw);
-  margin-left:-4px; /* 街屋彼此緊密相連，左右牆壁無縫接軌 */
+  margin-left:-3px; /* 緊密接連 */
   text-align:center;
   z-index:2;
   transition:transform .15s;
   background:none;
   border:none;
   padding:0;
+  vertical-align:bottom;
 }
-.house:active{transform:translateY(3px)}
-.house.mine{--hw:8.6rem;z-index:4}
+.house:active{transform:translateY(2px)}
+.house.mine{
+  /* 我家維持與鄰居相同寬度與底線對齊，以名牌與精緻高屋脊凸顯主角感 */
+  --hw:8.4rem;
+  z-index:3;
+}
 
-/* 房屋 SVG 本體 */
+/* 房屋 SVG 本體：底部 100% 齊平地面 */
 .house-svg{
   width:100%;
   height:auto;
   display:block;
+  vertical-align:bottom;
   overflow:visible;
 }
 
-/* 煙囪冒粉紅愛心炊煙（當上線中或我家開燈時飄出） */
+/* 煙囪冒粉紅愛心炊煙 */
 .h-smoke{
   display:none;
-  transform-origin:170px 45px;
+  transform-origin:165px 40px;
 }
 .house.on .h-smoke{
   display:block;
@@ -128,37 +134,42 @@ h1,h2,h3,p{margin:0}
   100%{transform:translateY(-14px) scale(1.15);opacity:0.1}
 }
 
-/* 窗戶與木質窗框顏色設計（使用者要求：窗框維持統一咖啡色，關燈時有高對比，開燈時有通明暖光） */
-/* 窗框：沉穩溫暖的深咖啡色 */
+/* ===== 窗戶設計：咖啡色外框 ＋ 關燈純黑窗（清晰對比） ＋ 開燈金黃暖光 ===== */
 .house .win-outer-frame{
-  stroke:#422a1d;
-  stroke-width:3;
-}
-.house .win-grid-line{
-  stroke:#422a1d;
-  stroke-width:2.5;
-  stroke-linecap:round;
+  stroke:#3e271a;
+  stroke-width:2.4;
 }
 
-/* 🌙 關燈 / 休息中：高對比清晰玻璃（柔和淡青灰晨昏玻璃光澤，與深咖啡窗框形成清晰分明的高對比，不黑糊一片） */
+/* 🌙 關燈 / 休息中：純深黑窗面 (#18202c)，搭配清晰亮白十字窗格線 (#ffffff)，在黑窗上清清楚楚、對比極高！ */
 .house .win-pane{
-  fill:#d2dde3;
+  fill:#18202c;
   transition:fill .3s, filter .3s;
 }
+.house .win-grid-line{
+  stroke:#ffffff;
+  stroke-width:2;
+  stroke-linecap:round;
+  opacity:0.95;
+  transition:stroke .3s;
+}
 
-/* 💡 上線中 / 開燈：明亮溫暖金黃透光，窗玻璃變成金色暖光，深咖啡窗框輪廓依然一清二楚！ */
+/* 💡 上線中 / 開燈：窗面轉為溫暖透亮金黃暖光 (#ffe366)，窗格線轉為深咖啡色 (#3e271a)，滿滿生活感！ */
 .house.on .win-pane{
-  fill:#ffea78;
-  filter:drop-shadow(0 0 7px #ffb326);
+  fill:#ffe366;
+  filter:drop-shadow(0 0 6px #ffbe26);
   animation:winWarmGlow 3.5s ease-in-out infinite alternate;
 }
+.house.on .win-grid-line{
+  stroke:#3e271a;
+  opacity:0.9;
+}
 @keyframes winWarmGlow{
-  0%{fill:#ffe366;filter:drop-shadow(0 0 5px #ffa81e)}
-  100%{fill:#fff299;filter:drop-shadow(0 0 11px #ffbe26)}
+  0%{fill:#fed54a;filter:drop-shadow(0 0 4px #ffa81e)}
+  100%{fill:#ffeb85;filter:drop-shadow(0 0 10px #ffbe26)}
 }
 
 /* 外出中與蜘蛛網機制（完整保留） */
-.house.off{filter:saturate(.85) brightness(.96)}
+.house.off{filter:saturate(.85) brightness(.97)}
 .house.away{filter:saturate(.9)}
 .house.cobweb{filter:saturate(.55) brightness(.88)}
 .house .cobweb-svg{
@@ -169,7 +180,7 @@ h1,h2,h3,p{margin:0}
   display:block;
 }
 
-/* 房屋下方名牌與狀態膠囊 */
+/* 房屋下方名牌與狀態膠囊（完美齊平） */
 .house>.plate{
   display:flex;
   flex-direction:column;
@@ -959,20 +970,20 @@ const PRODUCTS=[
 ];
 let curShopCat='all';
 const HOUSE_THEMES = [
-  // 0. 經典粉藍（如同使用者提供的參考圖）
-  { wall:'#bed4de', roof:'#c48849', roofLine:'#fbf5eb', arch:'#f4ebd9', door:'#fffbf2', line:'#3a2d27', grass:'#9bb396', knob:'#cca152' },
+  // 0. 經典粉藍（如同參考圖，無粗重線框，細膩優雅）
+  { wall:'#c1d7e1', roof:'#c7894a', roofLine:'#fffaf2', arch:'#f4eedf', door:'#ffffff', line:'#95abb7', roofOutline:'#a86d34', grass:'#9bb396', knob:'#cca152' },
   // 1. 溫暖奶油杏黃
-  { wall:'#f5e6c8', roof:'#bc6547', roofLine:'#fefbf4', arch:'#ede0c8', door:'#fffdf9', line:'#442f24', grass:'#9bb396', knob:'#d49244' },
+  { wall:'#f5e5c7', roof:'#c26647', roofLine:'#fffcf5', arch:'#eee1c9', door:'#ffffff', line:'#d2bfa1', roofOutline:'#9e4a30', grass:'#9bb396', knob:'#d49244' },
   // 2. 鼠尾草粉綠
-  { wall:'#c5d8c3', roof:'#aa7051', roofLine:'#f8f9f4', arch:'#f0eee1', door:'#ffffff', line:'#353b30', grass:'#7c9c76', knob:'#c99a4e' },
+  { wall:'#c5d7c3', roof:'#aa7051', roofLine:'#f8faf4', arch:'#edece0', door:'#ffffff', line:'#9eb49c', roofOutline:'#885337', grass:'#7c9c76', knob:'#c99a4e' },
   // 3. 柔和玫瑰粉橘
-  { wall:'#f1cfc2', roof:'#5a7684', roofLine:'#fff7f4', arch:'#faece6', door:'#fffaf7', line:'#4a312d', grass:'#9db097', knob:'#cca152' },
+  { wall:'#f2cfc3', roof:'#5a7684', roofLine:'#fff8f5', arch:'#faebe6', door:'#ffffff', line:'#d4aea0', roofOutline:'#415b67', grass:'#9db097', knob:'#cca152' },
   // 4. 溫潤石洗灰紫
-  { wall:'#d5cbdb', roof:'#d49054', roofLine:'#fcf8f6', arch:'#eee9f1', door:'#ffffff', line:'#3d3244', grass:'#93a992', knob:'#c79344' },
+  { wall:'#d5cbdc', roof:'#d49054', roofLine:'#fcf8f6', arch:'#eee9f1', door:'#ffffff', line:'#b2a4b9', roofOutline:'#b07038', grass:'#93a992', knob:'#c79344' },
   // 5. 晴空柔粉青
-  { wall:'#bbd8d8', roof:'#b86e56', roofLine:'#f7fbfb', arch:'#e8f0f0', door:'#fffefb', line:'#2a3b3b', grass:'#83a68d', knob:'#cca152' },
+  { wall:'#bdd8d8', roof:'#b86e56', roofLine:'#f7fbfb', arch:'#e8f0f0', door:'#ffffff', line:'#95b3b3', roofOutline:'#944f3a', grass:'#83a68d', knob:'#cca152' },
   // 6. 陽光溫暖鵝黃
-  { wall:'#fae8b6', roof:'#66827a', roofLine:'#fffcf0', arch:'#f5f0dc', door:'#ffffff', line:'#463a24', grass:'#94ab87', knob:'#c98c36' }
+  { wall:'#fae8b7', roof:'#66827a', roofLine:'#fffcf0', arch:'#f5f0dc', door:'#ffffff', line:'#d9c38c', roofOutline:'#4b655e', grass:'#94ab87', knob:'#c98c36' }
 ];
 const SAMPLE_NAMES=['阿玉姨','陳叔叔','美玲姐','老周','王媽媽','志明哥','小花阿姨','阿財伯'];
 
@@ -1030,75 +1041,78 @@ function closeDlg(){$('#dlg').classList.remove('show')}
 
 /* =============== 村莊：街道與房子 =============== */
 function buildHouseSVG(t, isMine, isOnline) {
-  return '<svg class="house-svg" viewBox="0 0 200 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">' +
-    // 煙囪愛心炊煙 (上線中/開燈時飄出)
+  // viewBox: 0 0 200 260
+  // 屋頂從 y=12 到 y=104
+  // 牆面從 y=104 到 y=260（底部完全齊平 260，絕不上下參差）
+  return '<svg class="house-svg" viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">' +
+    // 煙囪愛心炊煙
     '<g class="h-smoke">' +
       '<path d="M165 24 C165 19 160 17 160 21 C160 25 165 29 165 29 C165 29 170 25 170 21 C170 17 165 19 165 24 Z" fill="#f096a8"/>' +
       '<path d="M176 13 C176 9 172 8 172 11 C172 14 176 17 176 17 C176 17 180 14 180 11 C180 8 176 9 176 13 Z" fill="#f8b4c2"/>' +
       '<path d="M158 8 C158 4 155 3 155 6 C155 8 158 10 158 10 C158 10 161 8 161 6 C161 3 158 4 158 8 Z" fill="#fbc7d2"/>' +
     '</g>' +
 
-    // 煙囪 (緊貼右側屋頂斜邊)
-    '<rect x="160" y="48" width="14" height="42" rx="1.5" fill="' + t.roof + '" stroke="' + t.line + '" stroke-width="3" stroke-linejoin="round"/>' +
+    // 煙囪 (插畫無厚黑邊，色塊融合)
+    '<rect x="160" y="46" width="14" height="45" rx="1.5" fill="' + t.roof + '" stroke="' + t.roofOutline + '" stroke-width="1.5"/>' +
 
-    // 牆面主體 (x="0" 到 x="200" 滿版，保證街屋彼此左右緊密接連不留縫隙)
-    '<rect x="0" y="100" width="200" height="156" fill="' + t.wall + '" stroke="' + t.line + '" stroke-width="3.5" stroke-linejoin="round"/>' +
+    // 牆面主體 (色塊無粗重黑外框，邊界自然輕柔)
+    '<rect x="0" y="104" width="200" height="156" fill="' + t.wall + '"/>' +
 
-    // 屋頂三角形 (大陡斜屋頂，左右滿版相連)
-    '<path d="M100 8 L200 100 L0 100 Z" fill="' + t.roof + '" stroke="' + t.line + '" stroke-width="3.5" stroke-linejoin="round"/>' +
+    // 屋頂三角形 (大陡斜屋頂)
+    '<path d="M100 12 L200 104 L0 104 Z" fill="' + t.roof + '"/>' +
 
-    // 屋頂手繪白橫條紋 (如參考圖)
+    // 屋頂手繪白橫條紋 (純色線條無黑邊，清新如插畫)
     '<g stroke="' + t.roofLine + '" stroke-width="3.5" stroke-linecap="round" opacity="0.95">' +
-      '<line x1="86" y1="28" x2="114" y2="28"/>' +
-      '<line x1="72" y1="46" x2="128" y2="46"/>' +
-      '<line x1="58" y1="64" x2="142" y2="64"/>' +
-      '<line x1="44" y1="82" x2="156" y2="82"/>' +
-      '<line x1="28" y1="96" x2="172" y2="96"/>' +
+      '<line x1="86" y1="32" x2="114" y2="32"/>' +
+      '<line x1="72" y1="50" x2="128" y2="50"/>' +
+      '<line x1="58" y1="68" x2="142" y2="68"/>' +
+      '<line x1="44" y1="86" x2="156" y2="86"/>' +
+      '<line x1="26" y1="100" x2="174" y2="100"/>' +
     '</g>' +
 
-    // 二樓左窗 (四格方窗，咖啡色外框與十字框，關燈高對比、開燈金黃透光)
-    '<rect class="win-pane win-outer-frame" x="28" y="124" width="30" height="32" rx="2"/>' +
-    '<line class="win-grid-line" x1="43" y1="124" x2="43" y2="156"/>' +
-    '<line class="win-grid-line" x1="28" y1="140" x2="58" y2="140"/>' +
+    // 二樓左窗 (四格方窗，咖啡色木外框 ＋ 關燈純黑玻璃 ＋ 白色高對比十字框)
+    '<rect class="win-pane win-outer-frame" x="26" y="126" width="32" height="34" rx="2"/>' +
+    '<line class="win-grid-line" x1="42" y1="126" x2="42" y2="160"/>' +
+    '<line class="win-grid-line" x1="26" y1="143" x2="58" y2="143"/>' +
 
     // 二樓中窗 (四格方窗)
-    '<rect class="win-pane win-outer-frame" x="85" y="124" width="30" height="32" rx="2"/>' +
-    '<line class="win-grid-line" x1="100" y1="124" x2="100" y2="156"/>' +
-    '<line class="win-grid-line" x1="85" y1="140" x2="115" y2="140"/>' +
+    '<rect class="win-pane win-outer-frame" x="84" y="126" width="32" height="34" rx="2"/>' +
+    '<line class="win-grid-line" x1="100" y1="126" x2="100" y2="160"/>' +
+    '<line class="win-grid-line" x1="84" y1="143" x2="116" y2="143"/>' +
 
     // 二樓右窗 (四格方窗)
-    '<rect class="win-pane win-outer-frame" x="142" y="124" width="30" height="32" rx="2"/>' +
-    '<line class="win-grid-line" x1="157" y1="124" x2="157" y2="156"/>' +
-    '<line class="win-grid-line" x1="142" y1="140" x2="172" y2="140"/>' +
+    '<rect class="win-pane win-outer-frame" x="142" y="126" width="32" height="34" rx="2"/>' +
+    '<line class="win-grid-line" x1="158" y1="126" x2="158" y2="160"/>' +
+    '<line class="win-grid-line" x1="142" y1="143" x2="174" y2="143"/>' +
 
-    // 一樓拱形大門 (經典米白大拱門)
-    '<path d="M26 256 V204 C26 176 74 176 74 204 V256 Z" fill="' + t.arch + '" stroke="' + t.line + '" stroke-width="3.5" stroke-linejoin="round"/>' +
-    '<path d="M35 256 V208 C35 186 65 186 65 208 V256 Z" fill="' + t.door + '" stroke="' + t.line + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+    // 一樓拱形大門 (大米白溫暖拱門，底緣剛好觸碰底線 y=260)
+    '<path d="M26 260 V206 C26 176 74 176 74 206 V260 Z" fill="' + t.arch + '"/>' +
+    '<path d="M35 260 V210 C35 186 65 186 65 210 V260 Z" fill="' + t.door + '"/>' +
     // 金色門把
-    '<circle cx="56" cy="232" r="4" fill="' + t.knob + '" stroke="' + t.line + '" stroke-width="1.8"/>' +
+    '<circle cx="56" cy="235" r="4.5" fill="' + t.knob + '" stroke="#99702a" stroke-width="1.2"/>' +
 
-    // 一樓右側雙長型窗 (咖啡色外框)
-    '<rect class="win-pane win-outer-frame" x="106" y="186" width="20" height="36" rx="2"/>' +
-    '<rect class="win-pane win-outer-frame" x="148" y="186" width="20" height="36" rx="2"/>' +
+    // 一樓右側雙長型窗 (咖啡色外框 ＋ 關燈純黑玻璃)
+    '<rect class="win-pane win-outer-frame" x="106" y="186" width="22" height="38" rx="2"/>' +
+    '<rect class="win-pane win-outer-frame" x="148" y="186" width="22" height="38" rx="2"/>' +
 
-    // 門前草地/小木籬草飾 (如參考圖底部綠色小刻痕)
-    '<g stroke="' + t.grass + '" stroke-width="3.5" stroke-linecap="round" opacity="0.85">' +
-      '<line x1="102" y1="236" x2="102" y2="249"/>' +
-      '<line x1="112" y1="236" x2="112" y2="249"/>' +
-      '<line x1="122" y1="236" x2="122" y2="249"/>' +
-      '<line x1="132" y1="236" x2="132" y2="249"/>' +
-      '<line x1="142" y1="236" x2="142" y2="249"/>' +
-      '<line x1="152" y1="236" x2="152" y2="249"/>' +
-      '<line x1="162" y1="236" x2="162" y2="249"/>' +
-      '<line x1="172" y1="236" x2="172" y2="249"/>' +
+    // 門前草地刻痕
+    '<g stroke="' + t.grass + '" stroke-width="3" stroke-linecap="round" opacity="0.85">' +
+      '<line x1="100" y1="242" x2="100" y2="254"/>' +
+      '<line x1="110" y1="242" x2="110" y2="254"/>' +
+      '<line x1="120" y1="242" x2="120" y2="254"/>' +
+      '<line x1="130" y1="242" x2="130" y2="254"/>' +
+      '<line x1="140" y1="242" x2="140" y2="254"/>' +
+      '<line x1="150" y1="242" x2="150" y2="254"/>' +
+      '<line x1="160" y1="242" x2="160" y2="254"/>' +
+      '<line x1="170" y1="242" x2="170" y2="254"/>' +
     '</g>' +
 
-    // 蜘蛛網（久未上線時浮現於屋簷與窗戶）
-    '<g class="cobweb-svg" stroke="#5a5247" stroke-width="1.6" fill="none">' +
-      '<path d="M0 100 L40 116 M0 100 L26 136 M0 100 L12 148"/>' +
-      '<path d="M16 100 Q16 112 0 116 M32 100 Q28 124 0 132"/>' +
-      '<path d="M200 100 L166 115 M200 100 L176 134"/>' +
-      '<path d="M184 100 Q182 112 200 114 M170 100 Q174 122 200 128"/>' +
+    // 蜘蛛網
+    '<g class="cobweb-svg" stroke="#73685a" stroke-width="1.5" fill="none">' +
+      '<path d="M0 104 L40 120 M0 104 L26 140 M0 104 L12 152"/>' +
+      '<path d="M16 104 Q16 116 0 120 M32 104 Q28 128 0 136"/>' +
+      '<path d="M200 104 L166 119 M200 104 L176 138"/>' +
+      '<path d="M184 104 Q182 116 200 118 M170 104 Q174 126 200 132"/>' +
     '</g>' +
   '</svg>';
 }
