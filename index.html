@@ -328,16 +328,68 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 .pill{background:#f3f0e7;border-radius:99px;padding:6px 14px;font-weight:500}
 .back{display:inline-flex;align-items:center;min-height:48px;padding:0 14px;border-radius:14px;background:var(--mint);font-weight:800;color:#2f4c36;margin-top:14px}
 
-/* ===== 房間互動（我的家 & 鄰居家串門子） ===== */
-.room{border-radius:20px;height:250px;background:linear-gradient(#f3e8d2 0 66%,#d5ab82 66%);position:relative;overflow:hidden;border:3px solid #d8cbb3;touch-action:none;user-select:none}
+/* ===== 房間互動（我的家 & 鄰居家串門子：純淨無框、無文字、支援放大縮小） ===== */
+.room{border-radius:20px;height:260px;background:linear-gradient(#f4ebd9 0 65%,#d8b087 65%);position:relative;overflow:hidden;border:3px solid #d8cbb3;touch-action:none;user-select:none}
 .room:before{content:'';position:absolute;left:8%;top:18px;width:68px;height:68px;border:6px solid #fff8;background:#ffd45e;border-radius:8px;box-shadow:0 0 22px #ffcf5a;pointer-events:none}
-.room:after{content:'';position:absolute;left:0;right:0;top:66%;height:4px;background:#b98b60;pointer-events:none}
-.room-item{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:grab;padding:4px;border-radius:14px;transition:box-shadow .15s,background .15s;z-index:2}
+.room:after{content:'';position:absolute;left:0;right:0;top:65%;height:4px;background:#b98b60;pointer-events:none}
+.room-item{
+  position:absolute;
+  transform:translate(-50%,-50%) scale(var(--sc, 1));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:grab;
+  padding:0;
+  border:none;
+  background:none;
+  z-index:2;
+  transition:filter .15s, transform .08s;
+  touch-action:none;
+}
 .room-item:active{cursor:grabbing;z-index:10}
-.room-item.sel{background:#ffffffcc;box-shadow:0 0 0 3px var(--orange),0 6px 16px #0003;z-index:9}
-.room-item .ri-ico{font-size:2.55rem;line-height:1.05;filter:drop-shadow(0 3px 3px #0002)}
-.room-item .ri-tag{font-size:.72rem;font-weight:800;background:#fffdf8ee;color:#4a3f2d;padding:1px 7px;border-radius:99px;border:1px solid #d8cbb3;white-space:nowrap;margin-top:2px}
-.room-item.from-friend .ri-tag{background:#fff0cf;color:#724d0a;border-color:#ebcb78}
+/* 選取中時只有乾淨柔和的橘黃色光芒，完全沒有生硬方框與白卡片！ */
+.room-item.sel{
+  z-index:9;
+  filter:drop-shadow(0 0 10px #bf5f35) drop-shadow(0 6px 12px rgba(0,0,0,0.3));
+}
+.room-item .ri-ico{
+  font-size:3rem;
+  line-height:1;
+  display:block;
+  filter:drop-shadow(0 4px 6px rgba(0,0,0,0.18));
+  user-select:none;
+  -webkit-user-select:none;
+}
+/* 徹底移除文字說明與框框 */
+.room-item .ri-tag{display:none!important}
+
+/* 大小縮放控制列 */
+.scale-ctrl-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  background:#fffdf8;
+  border:1.5px solid #e2dacb;
+  border-radius:14px;
+  padding:6px 12px;
+  margin:10px 0;
+}
+.scale-ctrl-row span{font-size:0.92rem;font-weight:800;color:var(--sub)}
+.scale-btn{
+  min-height:36px;
+  min-width:44px;
+  padding:0 12px;
+  border-radius:10px;
+  background:#f1eee5;
+  font-weight:800;
+  font-size:1.05rem;
+  color:#4a3f2d;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.scale-btn:active{background:#e3decb;transform:scale(0.95)}
 .item-ctrl{margin-top:12px;padding:14px;border-radius:18px;background:#f5f0e4;border:2px solid #e0d6c2}
 .item-ctrl-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .item-ctrl-head b{font-size:1.1rem}
@@ -1280,7 +1332,7 @@ function visitFriendRoom(id){
   const itemsHTML=f.roomItems.map((it,idx)=>{
     const p=PRODUCTS.find(x=>x.id===it.id)||{icon:'🎁',name:'好禮'};
     const tag=it.from?`💝 ${esc(it.from)}送的`:p.name;
-    return `<div class="room-item ${it.from?'from-friend':''}" style="left:${it.x||50}%;top:${it.y||70}%"><span class="ri-ico">${p.icon}</span><span class="ri-tag">${tag}</span></div>`;
+    const sc = it.scale || 1.0; return `<div class="room-item ${it.from?'from-friend':''}" style="left:${it.x||50}%;top:${it.y||70}%;--sc:${sc}"><span class="ri-ico">${p.icon}</span></div>`;
   }).join('');
   const mySendable=S.myItems.map(it=>({it,p:PRODUCTS.find(x=>x.id===it.id)})).filter(x=>x.p);
   dialog({kicker:'🚪 串門子參觀中',title:`${f.name}的溫馨小窩`,html:
@@ -1311,21 +1363,33 @@ function openMine(){
   const selItem=S.myItems.find(x=>x.uid===selectedItemUid);
   const selProd=selItem?PRODUCTS.find(x=>x.id===selItem.id):null;
   const refund=selProd?Math.max(1,Math.round(selProd.price*0.3)):0;
+  const curScale = (selItem && selItem.scale) ? selItem.scale : 1.0;
 
   const itemsHTML=S.myItems.map(it=>{
     const p=PRODUCTS.find(x=>x.id===it.id)||{icon:'🎁',name:'物品'};
-    return `<div class="room-item ${it.uid===selectedItemUid?'sel':''}" data-uid="${it.uid}" style="left:${it.x}%;top:${it.y}%"><span class="ri-ico">${p.icon}</span><span class="ri-tag">${esc(p.name)}</span></div>`;
+    const sc = it.scale || 1.0;
+    return `<div class="room-item ${it.uid===selectedItemUid?'sel':''}" data-uid="${it.uid}" style="left:${it.x}%;top:${it.y}%;--sc:${sc}"><span class="ri-ico">${p.icon}</span></div>`;
   }).join('');
 
   dialog({kicker:'歡迎回家',title:`${S.name||'我'}的家`,html:
    `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-      <span style="font-weight:800;color:var(--sub);font-size:.92rem">👆 按住屋裡物品可直接拖曳移動位置</span>
-      <button class="btn ${S.myAway?'orange':'light'}" style="min-height:42px;padding:0 12px;font-size:.9rem" data-act="toggleMyAway">${S.myAway?'🧳 外出中（點此改回在家）':'🏠 我在家（出遠門點此設外出）'}</button>
+      <span style="font-weight:800;color:var(--sub);font-size:.92rem">👆 點選物品可自由拖曳、放大縮小</span>
+      <button class="btn ${S.myAway?'orange':'light'}" style="min-height:40px;padding:0 12px;font-size:.88rem" data-act="toggleMyAway">${S.myAway?'🧳 外出中（點此改回在家）':'🏠 我在家（出遠門點此設外出）'}</button>
     </div>
     <div class="room" id="myRoomCanvas">${itemsHTML||'<div style="position:absolute;inset:0;display:grid;place-items:center;color:var(--sub)">屋裡還沒有物品，去街坊小舖逛逛吧！</div>'}</div>
     ${selProd?`
     <div class="item-ctrl">
-      <div class="item-ctrl-head"><span style="font-size:2rem">${selProd.icon}</span><div><b>${esc(selProd.name)}</b><div style="font-size:.86rem;color:var(--sub)">原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)</div></div></div>
+      <div class="item-ctrl-head"><span style="font-size:2.2rem">${selProd.icon}</span><div><b>${esc(selProd.name)}</b><div style="font-size:.86rem;color:var(--sub)">原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)</div></div></div>
+      
+      <!-- 物品大小縮放控制 -->
+      <div class="scale-ctrl-row">
+        <span>物品大小：</span>
+        <button class="scale-btn" data-act="scaleItem" data-d="-0.15" aria-label="縮小">🔍 縮小</button>
+        <b id="scaleLabel" style="font-size:1.05rem;min-width:52px;text-align:center">${Math.round(curScale * 100)}%</b>
+        <button class="scale-btn" data-act="scaleItem" data-d="0.15" aria-label="放大">🔎 放大</button>
+        <button class="scale-btn" data-act="scaleItem" data-reset="1" style="font-size:.85rem;color:var(--sub)" aria-label="重設大小">還原</button>
+      </div>
+
       <div class="item-ctrl-btns">
         <button class="btn light" data-act="showSendItem" data-uid="${selItem.uid}">🎁 送給鄰居</button>
         <button class="btn orange" data-act="recycleItem" data-uid="${selItem.uid}">♻️ 回收換 +${refund} 點</button>
@@ -1338,7 +1402,6 @@ function openMine(){
     <button class="btn light big" style="margin-top:12px" data-act="goShopFromHome">🌷 去街坊小舖添購好禮 / 家具</button>`});
   bindRoomDrag();
 }
-
 function bindRoomDrag(){
   const room=$('#myRoomCanvas');if(!room)return;
   let draggingEl=null,dragUid=null,rect=null;
@@ -2198,6 +2261,24 @@ const ACT={
     selectedItemUid=S.myItems.length?S.myItems[S.myItems.length-1].uid:null;
     write('myItems',S.myItems);write('friends',S.friends);renderShop();openMine();SFX.reward();
     toast(`🎁 已將「${p?p.name:'好禮'}」送給 ${f.name}！`);
+  },
+  scaleItem:el=>{
+    const item = S.myItems.find(x=>x.uid===selectedItemUid);
+    if(!item)return;
+    if(el.dataset.reset){
+      item.scale = 1.0;
+    }else{
+      const d = parseFloat(el.dataset.d) || 0;
+      const cur = item.scale || 1.0;
+      item.scale = Math.max(0.5, Math.min(2.2, Math.round((cur + d) * 100) / 100));
+    }
+    write('myItems', S.myItems);
+    // 更新畫面上該物品的 scale
+    const dom = $(`#myRoomCanvas [data-uid="${item.uid}"]`);
+    if(dom) dom.style.setProperty('--sc', item.scale);
+    const lbl = $('#scaleLabel');
+    if(lbl) lbl.textContent = Math.round(item.scale * 100) + '%';
+    SFX.tap();
   },
   recycleItem:el=>{
     const idx=S.myItems.findIndex(x=>x.uid===el.dataset.uid);if(idx<0)return;
