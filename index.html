@@ -85,10 +85,9 @@ h1,h2,h3,p{margin:0}
 @keyframes drift{to{transform:translateX(40px)}}
 .tree{flex:0 0 auto;align-self:flex-end;font-size:3.2rem;line-height:1;margin:0 4px calc(var(--plate-h) - 6px);position:relative;z-index:0}
 
-/* 房子：歐式鄉村童話風街屋（保留開關燈、外出中、蜘蛛網機制） */
+/* ===== 北歐繪本風童話手繪小屋（1:1 照參考圖繪製，支援 SVG、隨機配色與開關燈） ===== */
 .house{
   --hw:7.2rem;
-  --h:150px;
   position:relative;
   display:flex;
   flex-direction:column;
@@ -99,259 +98,71 @@ h1,h2,h3,p{margin:0}
   text-align:center;
   z-index:2;
   transition:transform .15s;
+  background:none;
+  border:none;
+  padding:0;
 }
-.house>span{display:block}
 .house:active{transform:translateY(3px)}
-.house.v1{--h:166px}
-.house.v2{--h:140px}
-.house.mine{--hw:8.8rem;--h:182px;z-index:4}
+.house.mine{--hw:8.6rem;z-index:4}
 
-/* 小煙囪（部分款式與我家有磚紅小煙囪，我家上線時冒小白煙） */
-.chimney{
-  position:absolute;
-  top:-22px;
-  right:16px;
-  width:14px;
-  height:24px;
-  background:linear-gradient(to right, #9c4127, #ba5336);
-  border:2.5px solid #4a2818;
-  border-bottom:none;
-  border-radius:2px 2px 0 0;
-  box-shadow:inset -2px 0 0 #00000022;
-  z-index:1;
+/* 房屋 SVG 本體 */
+.house-svg{
+  width:100%;
+  height:auto;
+  display:block;
+  overflow:visible;
+  filter:drop-shadow(0 4px 8px rgba(50,40,30,0.12));
 }
-.chimney:before{
-  content:'';
-  position:absolute;
-  top:-5px;
-  left:-3px;
-  right:-3px;
-  height:5px;
-  background:#80311c;
-  border:2.5px solid #4a2818;
-  border-radius:3px;
-}
-.smoke{
+
+/* 煙囪冒粉紅愛心炊煙（當上線中或我家開燈時飄出） */
+.h-smoke{
   display:none;
-  position:absolute;
-  top:-14px;
-  left:2px;
-  font-size:0.8rem;
-  opacity:0.75;
-  animation:smokePuff 3.5s ease-out infinite;
-  pointer-events:none;
+  transform-origin:175px 50px;
 }
-.house.on .smoke{display:block}
-@keyframes smokePuff{
-  0%{transform:translate(0,0) scale(0.6);opacity:0}
-  30%{opacity:0.85}
-  100%{transform:translate(6px,-26px) scale(1.4);opacity:0}
+.house.on .h-smoke{
+  display:block;
+  animation:heartFloat 2.8s ease-in-out infinite;
 }
-.house.v1 .chimney{left:16px;right:auto}
-
-/* 歐式童話斜瓦屋頂與閣樓圓窗 */
-.roof{
-  position:relative;
-  height:54px;
-  background:
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 6px, transparent 6px, transparent 12px),
-    linear-gradient(180deg, rgba(255,255,255,0.28) 0%, rgba(0,0,0,0.18) 100%),
-    var(--roof);
-  clip-path:polygon(50% 0, 100% 100%, 0 100%);
-  filter:drop-shadow(0 3px 0 #3a1e12);
-  z-index:2;
-}
-.roof:after{
-  /* 屋簷木質下緣 */
-  content:'';
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:5px;
-  background:#432516;
-}
-.house.v1 .roof{
-  height:38px;
-  clip-path:polygon(12% 0, 88% 0, 100% 100%, 0 100%);
-}
-.house.v2 .roof{
-  height:48px;
-  clip-path:polygon(50% 0, 96% 100%, 4% 100%);
-}
-.house.mine .roof{
-  height:68px;
-  background:
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0, rgba(255,255,255,0.1) 7px, transparent 7px, transparent 14px),
-    linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0.2) 100%),
-    #b84d33;
-}
-/* 閣樓圓窗 */
-.attic-win{
-  position:absolute;
-  left:50%;
-  bottom:10px;
-  transform:translateX(-50%);
-  width:16px;
-  height:16px;
-  border-radius:50%;
-  background:#3b4554;
-  border:2.5px solid #fdf8eb;
-  box-shadow:0 1px 3px rgba(0,0,0,0.3);
-  z-index:3;
-}
-.house.on .attic-win{
-  background:#ffea79;
-  box-shadow:0 0 10px #ffd043;
+@keyframes heartFloat{
+  0%{transform:translateY(0) scale(0.85);opacity:0.2}
+  50%{opacity:0.95}
+  100%{transform:translateY(-14px) scale(1.15);opacity:0.1}
 }
 
-/* 房屋主體（鄉村質樸磚石質感牆面） */
-.body{
-  position:relative;
-  height:var(--h);
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.35) 0%, transparent 70%),
-    linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(0,0,0,0.06) 100%),
-    var(--w);
-  border:3px solid #4a2f20;
-  border-bottom:none;
-  box-shadow:inset 0 4px 6px rgba(255,255,255,0.3), inset 0 -4px 6px rgba(0,0,0,0.08);
+/* 窗戶開燈與關燈狀態控制 */
+/* 關燈/休息中：深藍黑色窗玻璃，白色窗框 */
+.house .win-pane{
+  fill:#1e2d42;
+  transition:fill .3s;
 }
-/* 牆壁底部的石砌基底 */
-.body:before{
-  content:'';
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:0;
-  height:14px;
-  background:repeating-linear-gradient(90deg, #8a7b6b 0 14px, #4a3628 14px 16px, #a39585 16px 30px);
-  border-top:2px solid #574130;
-  opacity:0.85;
+.house .win-frame{
+  stroke:#fdfbf7;
+  stroke-width:3;
+}
+/* 💡 上線中/開燈：窗戶亮起金黃色暖光，並有溫馨光暈 */
+.house.on .win-pane{
+  fill:#ffd452;
+  filter:drop-shadow(0 0 6px #ffbe26);
+  animation:winWarmGlow 3.5s ease-in-out infinite alternate;
+}
+@keyframes winWarmGlow{
+  0%{fill:#fed049;filter:drop-shadow(0 0 4px #ffa918)}
+  100%{fill:#ffe978;filter:drop-shadow(0 0 10px #ffbe26)}
 }
 
-/* 鄉村窗花與百葉木窗邊框 */
-.win{
-  position:absolute;
-  top:22px;
-  width:32px;
-  height:44px;
-  border:3.5px solid #523826;
-  border-radius:12px 12px 4px 4px;
-  background:
-    linear-gradient(#523826,#523826) center/3px 100% no-repeat,
-    linear-gradient(#523826,#523826) center/100% 3px no-repeat,
-    linear-gradient(135deg, rgba(255,255,255,0.2) 0% 35%, transparent 35%),
-    #252f3e;
-  box-shadow:0 3px 6px rgba(0,0,0,0.18), inset 0 2px 4px rgba(0,0,0,0.4);
-  transition:background .3s, box-shadow .3s;
-}
-.win.l{left:12px}.win.r{right:12px}
-.house.mine .win{width:42px;height:56px;top:26px}
-.house.mine .win.l{left:16px}.house.mine .win.r{right:16px}
-
-/* 窗台小鮮花盆栽 (窗下的小巧花草點綴) */
-.win:after{
-  content:'🌸🌿';
-  position:absolute;
-  bottom:-12px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:0.62rem;
-  letter-spacing:-1px;
-  line-height:1;
-  background:#fdf6e9;
-  padding:1px 3px;
-  border-radius:4px;
-  border:1.5px solid #7d5e44;
-  box-shadow:0 2px 4px rgba(0,0,0,0.15);
-  pointer-events:none;
-}
-.house.mine .win:after{
-  font-size:0.75rem;
-  bottom:-14px;
-}
-
-/* 💡 上線開燈機制：溫暖黃金色光芒透出與呼吸燈效果 */
-.house.on .win{
-  background:
-    linear-gradient(#8d6728,#8d6728) center/3px 100% no-repeat,
-    linear-gradient(#8d6728,#8d6728) center/100% 3px no-repeat,
-    radial-gradient(circle at 50% 65%, #ffffff 0%, #ffef96 45%, #f6bd38 90%);
-  border-color:#7a581e;
-  box-shadow:0 0 24px 8px #ffcf5a99, 0 3px 6px rgba(0,0,0,0.15);
-  animation:glow 4s ease-in-out infinite;
-}
-@keyframes glow{
-  50%{box-shadow:0 0 32px 12px #ffcf5acc, 0 3px 6px rgba(0,0,0,0.15)}
-}
-
-/* 拱形復古木門與金屬門把 */
-.door{
-  position:absolute;
-  left:50%;
-  bottom:0;
-  transform:translateX(-50%);
-  width:38px;
-  height:62px;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 10px, rgba(0,0,0,0.12) 10px 12px),
-    linear-gradient(180deg, #bf743c 0%, #8c471c 100%);
-  border:3.5px solid #482817;
-  border-bottom:0;
-  border-radius:20px 20px 0 0;
-  box-shadow:inset 0 3px 6px rgba(255,255,255,0.25), inset 0 -4px 6px rgba(0,0,0,0.3);
-  z-index:2;
-}
-/* 金色圓形門把與復古門框頂部橫木 */
-.door:before{
-  content:'';
-  position:absolute;
-  top:4px;
-  left:4px;
-  right:4px;
-  height:4px;
-  border-bottom:2px solid #57331e;
-}
-.door:after{
-  content:'';
-  position:absolute;
-  right:6px;
-  top:32px;
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:radial-gradient(circle at 35% 35%, #fff6c7, #e5a729);
-  border:1px solid #7c5409;
-  box-shadow:0 1px 2px rgba(0,0,0,0.3);
-}
-.house.mine .door{width:50px;height:76px}
-.house.mine .door:after{top:40px;width:7px;height:7px}
-
-/* 門前迎賓踏墊 */
-.door-mat{
-  position:absolute;
-  left:50%;
-  bottom:-4px;
-  transform:translateX(-50%);
-  width:36px;
-  height:4px;
-  background:#4d6d4a;
-  border-radius:3px;
-  border:1px solid #2e472c;
-  z-index:3;
-}
-.house.mine .door-mat{width:46px;background:#964332;border-color:#5c2115}
-
-/* 關燈、外出中與蜘蛛網機制（完整保留） */
-.house.off{filter:saturate(.82) brightness(.96)}
+/* 外出中與蜘蛛網機制（完整保留） */
+.house.off{filter:saturate(.85) brightness(.97)}
+.house.away{filter:saturate(.9)}
 .house.cobweb{filter:saturate(.55) brightness(.88)}
-.win .web{display:none;position:absolute;inset:-2px;pointer-events:none;opacity:.92}
-.house.cobweb .win .web{display:block}
-.corner-web{display:none;position:absolute;top:0;right:0;width:38px;height:38px;pointer-events:none;opacity:.85}
-.house.cobweb .corner-web{display:block}
+.house .cobweb-svg{
+  display:none;
+  pointer-events:none;
+}
+.house.cobweb .cobweb-svg{
+  display:block;
+}
 
-/* 溫馨手寫木牌名牌與狀態膠囊 */
+/* 房屋下方名牌與狀態膠囊 */
 .house>.plate{
   display:flex;
   flex-direction:column;
@@ -359,23 +170,23 @@ h1,h2,h3,p{margin:0}
   justify-content:center;
   gap:4px;
   height:var(--plate-h);
-  padding:8px 4px 6px;
+  padding:6px 2px 4px;
   width:100%;
 }
 .nm{
-  font-size:1.02rem;
+  font-size:1rem;
   line-height:1.25;
   font-weight:800;
   max-width:100%;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  color:#3b2b1a;
-  text-shadow:0 1px 0 #ffffff99;
+  color:#31261d;
+  text-shadow:0 1px 0 #ffffffbb;
 }
 .st{
   font-style:normal;
-  font-size:.78rem;
+  font-size:.76rem;
   line-height:1.3;
   font-weight:800;
   padding:2px 8px;
@@ -384,7 +195,7 @@ h1,h2,h3,p{margin:0}
   max-width:96%;
   overflow:hidden;
   text-overflow:ellipsis;
-  border:1px solid transparent;
+  border:1.5px solid transparent;
 }
 .house.on .st{background:#fff1c2;color:#6b4b0a;border-color:#f1d683}
 .house.off .st{background:#eee8db;color:#5c584f;border-color:#dcd4c3}
@@ -1140,8 +951,22 @@ const PRODUCTS=[
   {id:'dog_golden',name:'黃金大毛毛狗',icon:'🦮',price:2500,cat:'decor',desc:'村莊裡最受歡迎的守護神犬（傳說收藏）'}
 ];
 let curShopCat='all';
-const WALLS=['#f4e4c6','#ecd5c5','#d9e6d0','#dde6ec','#f2e0b4','#e8dcea'];
-const ROOFS=['#c97952','#6f8aa0','#d29a46','#7d9570','#b5748d','#8a6f9e'];
+const HOUSE_THEMES = [
+  // 0. 經典粉藍（如同使用者提供的參考圖）
+  { wall:'#bed4de', roof:'#c48849', roofLine:'#fbf5eb', arch:'#f4ebd9', door:'#fffbf2', line:'#3a2d27', grass:'#9bb396', knob:'#cca152' },
+  // 1. 溫暖奶油杏黃
+  { wall:'#f5e6c8', roof:'#bc6547', roofLine:'#fefbf4', arch:'#ede0c8', door:'#fffdf9', line:'#442f24', grass:'#9bb396', knob:'#d49244' },
+  // 2. 鼠尾草粉綠
+  { wall:'#c5d8c3', roof:'#aa7051', roofLine:'#f8f9f4', arch:'#f0eee1', door:'#ffffff', line:'#353b30', grass:'#7c9c76', knob:'#c99a4e' },
+  // 3. 柔和玫瑰粉橘
+  { wall:'#f1cfc2', roof:'#5a7684', roofLine:'#fff7f4', arch:'#faece6', door:'#fffaf7', line:'#4a312d', grass:'#9db097', knob:'#cca152' },
+  // 4. 溫潤石洗灰紫
+  { wall:'#d5cbdb', roof:'#d49054', roofLine:'#fcf8f6', arch:'#eee9f1', door:'#ffffff', line:'#3d3244', grass:'#93a992', knob:'#c79344' },
+  // 5. 晴空柔粉青
+  { wall:'#bbd8d8', roof:'#b86e56', roofLine:'#f7fbfb', arch:'#e8f0f0', door:'#fffefb', line:'#2a3b3b', grass:'#83a68d', knob:'#cca152' },
+  // 6. 陽光溫暖鵝黃
+  { wall:'#fae8b6', roof:'#66827a', roofLine:'#fffcf0', arch:'#f5f0dc', door:'#ffffff', line:'#463a24', grass:'#94ab87', knob:'#c98c36' }
+];
 const SAMPLE_NAMES=['阿玉姨','陳叔叔','美玲姐','老周','王媽媽','志明哥','小花阿姨','阿財伯'];
 
 /* =============== 鄰居上線狀態計算 =============== */
@@ -1197,22 +1022,110 @@ function dialog({kicker='',title,html}){
 function closeDlg(){$('#dlg').classList.remove('show')}
 
 /* =============== 村莊：街道與房子 =============== */
+function buildHouseSVG(t, isMine, isOnline) {
+  return '<svg class="house-svg" viewBox="0 0 210 285" fill="none" xmlns="http://www.w3.org/2000/svg" role="img">' +
+    // 煙囪愛心炊煙 (上線中/開燈時飄出)
+    '<g class="h-smoke">' +
+      '<path d="M172 26 C172 20 166 18 166 23 C166 27 172 31 172 31 C172 31 178 27 178 23 C178 18 172 20 172 26 Z" fill="#f096a8"/>' +
+      '<path d="M184 14 C184 9 179 8 179 12 C179 15 184 18 184 18 C184 18 189 15 189 12 C189 8 184 9 184 14 Z" fill="#f8b4c2"/>' +
+      '<path d="M165 8 C165 4 161 3 161 6 C161 9 165 11 165 11 C165 11 169 9 169 6 C169 3 165 4 165 8 Z" fill="#fbc7d2"/>' +
+    '</g>' +
+
+    // 煙囪 (右側緊貼屋頂斜邊)
+    '<rect x="168" y="52" width="14" height="42" rx="1.5" fill="' + t.roof + '" stroke="' + t.line + '" stroke-width="3" stroke-linejoin="round"/>' +
+
+    // 牆面主體 (長方形)
+    '<rect x="22" y="104" width="166" height="152" rx="2" fill="' + t.wall + '" stroke="' + t.line + '" stroke-width="3.5" stroke-linejoin="round"/>' +
+
+    // 屋頂三角形 (大陡斜屋頂)
+    '<path d="M105 8 L194 104 L16 104 Z" fill="' + t.roof + '" stroke="' + t.line + '" stroke-width="3.5" stroke-linejoin="round"/>' +
+
+    // 屋頂手繪橫條紋 (如參考圖)
+    '<g stroke="' + t.roofLine + '" stroke-width="3.5" stroke-linecap="round" opacity="0.95">' +
+      '<line x1="91" y1="28" x2="119" y2="28"/>' +
+      '<line x1="77" y1="46" x2="133" y2="46"/>' +
+      '<line x1="63" y1="64" x2="147" y2="64"/>' +
+      '<line x1="49" y1="82" x2="161" y2="82"/>' +
+      '<line x1="32" y1="99" x2="178" y2="99"/>' +
+    '</g>' +
+
+    // 二樓左窗 (四格方窗)
+    '<rect class="win-pane" x="50" y="128" width="28" height="30" rx="2" stroke="' + t.line + '" stroke-width="3"/>' +
+    '<line class="win-frame" x1="64" y1="128" x2="64" y2="158"/>' +
+    '<line class="win-frame" x1="50" y1="143" x2="78" y2="143"/>' +
+
+    // 二樓中窗 (四格方窗)
+    '<rect class="win-pane" x="97" y="128" width="26" height="29" rx="2" stroke="' + t.line + '" stroke-width="3"/>' +
+    '<line class="win-frame" x1="110" y1="128" x2="110" y2="157"/>' +
+    '<line class="win-frame" x1="97" y1="142.5" x2="123" y2="142.5"/>' +
+
+    // 二樓右窗 (四格方窗)
+    '<rect class="win-pane" x="141" y="127" width="25" height="28" rx="2" stroke="' + t.line + '" stroke-width="3"/>' +
+    '<line class="win-frame" x1="153.5" y1="127" x2="153.5" y2="155"/>' +
+    '<line class="win-frame" x1="141" y1="141" x2="166" y2="141"/>' +
+
+    // 一樓拱形門 (如參考圖的大米白拱門)
+    '<path d="M43 256 V208 C43 181 87 181 87 208 V256 Z" fill="' + t.arch + '" stroke="' + t.line + '" stroke-width="3.5" stroke-linejoin="round"/>' +
+    '<path d="M52 256 V213 C52 193 78 193 78 213 V256 Z" fill="' + t.door + '" stroke="' + t.line + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+    // 金色小門把
+    '<circle cx="69" cy="235" r="4" fill="' + t.knob + '" stroke="' + t.line + '" stroke-width="1.8"/>' +
+
+    // 一樓右側雙長型窗
+    '<rect class="win-pane" x="110" y="190" width="18" height="34" rx="2" stroke="' + t.line + '" stroke-width="3"/>' +
+    '<rect class="win-pane" x="146" y="190" width="17" height="34" rx="2" stroke="' + t.line + '" stroke-width="3"/>' +
+
+    // 門前草地/小木籬斜線草飾 (如參考圖底部綠色小刻痕)
+    '<g stroke="' + t.grass + '" stroke-width="3.5" stroke-linecap="round" opacity="0.85">' +
+      '<line x1="108" y1="237" x2="108" y2="249"/>' +
+      '<line x1="116" y1="237" x2="116" y2="249"/>' +
+      '<line x1="124" y1="237" x2="124" y2="249"/>' +
+      '<line x1="132" y1="237" x2="132" y2="249"/>' +
+      '<line x1="140" y1="237" x2="140" y2="249"/>' +
+      '<line x1="148" y1="237" x2="148" y2="249"/>' +
+      '<line x1="156" y1="237" x2="156" y2="249"/>' +
+      '<line x1="164" y1="237" x2="164" y2="249"/>' +
+    '</g>' +
+
+    // 蜘蛛網（久未上線時浮現於屋簷與窗戶）
+    '<g class="cobweb-svg" stroke="#5a5247" stroke-width="1.6" fill="none">' +
+      '<path d="M22 104 L60 120 M22 104 L45 138 M22 104 L30 150"/>' +
+      '<path d="M36 104 Q36 114 22 118 M50 104 Q46 126 22 134"/>' +
+      '<path d="M188 104 L154 118 M188 104 L165 135"/>' +
+      '<path d="M174 104 Q172 114 188 116 M160 104 Q164 124 188 130"/>' +
+    '</g>' +
+  '</svg>';
+}
 function houseHTML(f,mine){
-  let cls='',st='',label='';
+  let cls='',st='',label='',isOnline=false;
   if(mine){
     cls=S.myAway?'off away mine':'on mine';
     st=S.myAway?'🧳 外出中':'💡 上線中';
+    isOnline=!S.myAway;
     label=`${f.name}的家，${S.myAway?'目前已設定外出中':'上線中'}`;
   }else{
     const info=getFriendStatus(f);
     cls=info.cls;
     st=info.badge;
+    isOnline=info.online;
     label=`${f.name}的家，${info.badge}`;
   }
-  return `<button class="house v${f.v} ${cls}" data-act="house" data-id="${mine?'me':f.id}" aria-label="${esc(label)}" style="--w:${f.wall};--roof:${f.roof}">`+
-    `<span class="chimney"><span class="smoke">💨</span></span>`+
-    `<span class="roof"><span class="attic-win"></span></span>`+
-    `<span class="body">${CORNER_WEB_SVG}<span class="win l">${COBWEB_SVG}</span><span class="win r">${COBWEB_SVG}</span><span class="door"></span><span class="door-mat"></span></span>`+
+  // 配色主題：我自己固定用第 0 套（經典粉藍溫暖屋），朋友則依索引或隨機分配不同粉彩色系
+  let themeIdx = 0;
+  if (!mine) {
+    if (f.themeIdx != null) {
+      themeIdx = f.themeIdx % HOUSE_THEMES.length;
+    } else {
+      // 根據好友 ID 的雜湊碼挑選主題，確保每次進來顏色一致但每位鄰居都不同
+      let hash = 0;
+      for (let i = 0; i < (f.id||'').length; i++) hash = (hash * 31 + f.id.charCodeAt(i)) & 0xffffffff;
+      themeIdx = Math.abs(hash) % HOUSE_THEMES.length;
+    }
+  }
+  const theme = HOUSE_THEMES[themeIdx];
+  const svgHTML = buildHouseSVG(theme, mine, isOnline);
+
+  return `<button class="house ${mine?'mine':''} ${cls}" data-act="house" data-id="${mine?'me':f.id}" aria-label="${esc(label)}">`+
+    svgHTML +
     `<span class="plate"><b class="nm">${esc(f.name)}</b><em class="st">${st}</em></span></button>`;
 }
 const lotHTML=()=>`<button class="lot" data-act="add" aria-label="空地，點一下邀請鄰居"><span class="lot-in"><span><b>＋</b>邀請鄰居</span></span></button>`;
@@ -1311,7 +1224,7 @@ function addFriend(name){
     id:'f'+now+i,name,
     lastSeen:i%2===0?now-120000:now-4*3600000,
     away:false,
-    wall:WALLS[i%WALLS.length],roof:ROOFS[(i+2)%ROOFS.length],v:i%3,
+    themeIdx: i % HOUSE_THEMES.length,
     roomItems:[
       {id:sampleDecor[i%sampleDecor.length],x:32,y:72},
       {id:sampleDecor[(i+2)%sampleDecor.length],x:64,y:74}
