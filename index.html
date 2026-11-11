@@ -383,38 +383,46 @@ h1,h2,h3,p{margin:0}
 }
 .step-ocr-btns{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   gap:8px;
+  width:100%;
 }
 .step-upload-btn{
   display:flex;
   flex-direction:row;
   align-items:center;
   justify-content:center;
-  gap:8px;
-  padding:10px 6px;
-  min-height:56px;
+  gap:6px;
+  padding:8px 4px;
+  min-height:52px;
+  min-width:0;
+  width:100%;
   border-radius:14px;
   text-align:left;
   box-sizing:border-box;
+  overflow:hidden;
 }
 .step-upload-btn .ocr-ico{
-  font-size:1.6rem;
+  font-size:1.4rem;
   line-height:1;
   flex:0 0 auto;
 }
 .step-upload-btn .ocr-txt{
   display:flex;
   flex-direction:column;
-  line-height:1.25;
+  line-height:1.2;
   min-width:0;
+  flex:1 1 auto;
+  overflow:hidden;
 }
 .step-upload-btn .ocr-txt b{
-  font-size:.92rem;
+  font-size:.88rem;
   white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
 }
 .step-upload-btn .ocr-txt small{
-  font-size:.72rem;
+  font-size:.68rem;
   opacity:.85;
   margin-top:2px;
   white-space:nowrap;
@@ -480,6 +488,27 @@ h1,h2,h3,p{margin:0}
   background:#fff3cd;
   color:#664d03;
   border:1.5px solid #ffe69c;
+}
+.ocr-warn-head{
+  font-size:1.05rem;
+  font-weight:800;
+  color:#856404;
+}
+.ocr-warn-head b{
+  color:#bf5f35;
+}
+.ocr-warn-sub{
+  font-size:.85rem;
+  font-weight:700;
+  color:#664d03;
+  margin-top:2px;
+}
+.ocr-warn-comment{
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px dashed #ffe69c;
+  font-size:.9rem;
+  color:#533f03;
 }
 .step-ocr-status.err{
   background:#f8d7da;
@@ -1821,22 +1850,45 @@ function setSteps(n){
   if(gain)addPoints(gain,`🎉 今天走了 ${n.toLocaleString()} 步，獲得 ${gain} 點！`);else{SFX.tap();renderTasks();toast('已更新今天的步數')}
 }
 
-/* =============== 方案 2：AI 步數截圖 / 拍照自動辨識 =============== */
+/* =============== 方案 2：AI 步數截圖 / 拍照自動辨識（嚴格核對今日日期） =============== */
 async function analyzeStepWithGemini(base64,mime){
   const apiKey=atob('QVEuQWI4Uk42STZKMTBMdjFObGVXbW5MYVBYRWZScHNLVnhOcWhtQTNuZkpqUUxCUVdmeWc=');
   const apiUrl=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-  const prompt=`你是一位親切、善於鼓勵長輩的社區健康小助手。
-使用者上傳了一張「手機健康 App 截圖（例如：Apple健康、Google Fit、Samsung Health、小米運動、Garmin、華為手環 App 等）」或是「直接拍照實體智慧手環 / 電子計步器的螢幕」。
-請仔細辨識圖片中顯示的【今日總步數】（Step count）。
-注意事項：
-1. 請忽略消耗卡路里(kcal)、移動距離(公里/km)、心率(bpm)或目標設定，只提取【實際走出的總步數（整數）】。
-2. 若有千分位逗號（如 6,850），請轉換為純數字 6850。
-3. 若完全看不出任何步數數字，steps 請填 0。
+
+  const now=new Date();
+  const year=now.getFullYear();
+  const month=now.getMonth()+1;
+  const date=now.getDate();
+  const weekDays=['日','一','二','三','四','五','六'];
+  const dayName='星期'+weekDays[now.getDay()];
+  const todayStr=`${year}年${month}月${date}日（${dayName}）`;
+
+  const prompt=`你是一位專門協助長輩辨識運動步數的社區健康小助手。
+【現在系統時間】：今天是西元 ${todayStr}（即 ${month}月${date}日）。
+
+使用者上傳了一張「手機健康 App 截圖（如 Apple健康、Google Fit/Google健康、Samsung Health、小米運動、Garmin等）」或「實體手環/計步器拍照」。
+請仔細辨識圖片中顯示的【日期】與【步數】：
+
+【重要核心要求：核對日期是否為今天】：
+1. 仔細檢查圖片中的日期標示（例如：「今天」、「Today」、「${month}月${date}日」、「${month}/${date}」等）：
+   - 如果標示為今天（或是相機拍實體手環螢幕通常沒有歷史日期標籤，默認當下）：isToday 設為 true，recordDate 填「今天」。
+   - 如果圖片上標註的是過去日期（例如：「昨天」、「Yesterday」、「${month}月${date-1}日」、「前天」或更早的日期如「11月8日」等非今天的日期）：
+     isToday 必須設為 false！
+     recordDate 請填入你看到的實際日期文字（例如：「11月8日」或「昨天」）。
+     comment 請用親切但堅定的長輩口吻說明，例如：「村長看到這張截圖是【${recordDate}】的歷史紀錄喔！請上傳【今天】的最新步數，才能登記今天的散步點數唷！」
+
+2. 【步數提取】：
+   - 提取圖片上的實際走路總步數（忽略卡路里kcal、公里數km、心率bpm或目標步數）。
+   - 請轉換為純整數數字（如 9,515 轉為 9515）。
+   - 若無法辨識任何數字請填 0。
+
 請回傳符合以下結構的 JSON：
 {
+  "isToday": true或false,
+  "recordDate": "辨識到的日期文字",
   "steps": 數字整數,
-  "source": "辨識到的來源名稱（例如：Apple健康、小米手環、Samsung Health、實體計步器）",
-  "comment": "給長輩的一句親切、溫暖的台語/繁中生活鼓勵話語（例如：哇！今天走了6,850步，筋骨活動得真好！）"
+  "source": "辨識到的來源名稱（例如：Apple健康、Google健康、小米手環、Samsung Health、實體計步器）",
+  "comment": "給長輩的親切話語"
 }`;
 
   const payload={
@@ -1852,11 +1904,13 @@ async function analyzeStepWithGemini(base64,mime){
       responseSchema:{
         type:'OBJECT',
         properties:{
+          isToday:{type:'BOOLEAN'},
+          recordDate:{type:'STRING'},
           steps:{type:'INTEGER'},
           source:{type:'STRING'},
           comment:{type:'STRING'}
         },
-        required:['steps','source','comment']
+        required:['isToday','recordDate','steps','source','comment']
       }
     }
   };
@@ -1898,17 +1952,31 @@ async function processStepImage(base64,mime){
   const statusEl=$('#stepOcrStatus');
   statusEl.style.display='block';
   statusEl.className='step-ocr-status loading';
-  statusEl.innerHTML='<div class="ocr-spinner"></div><b>🔍 AI 正在看您的截圖或照片，辨識步數中…</b><small>支援 Apple健康、小米、三星或手環拍照</small>';
+  statusEl.innerHTML='<div class="ocr-spinner"></div><b>🔍 AI 正在核對日期與辨識步數中…</b><small>確認是否為今日步數紀錄</small>';
 
   try{
     const res=await analyzeStepWithGemini(base64,mime);
     const steps=Math.max(0,Math.min(100000,Number(res.steps)||0));
+
+    if(res.isToday===false){
+      // ⚠️ 檢查出上傳的是過去的紀錄！
+      statusEl.className='step-ocr-status warn';
+      statusEl.innerHTML=`
+        <div class="ocr-warn-head">⚠️ 這張截圖是<b>【${esc(res.recordDate||'過去幾天')}】</b>的紀錄喔！</div>
+        <div class="ocr-warn-sub">偵測到步數：${steps.toLocaleString()} 步（來源：${esc(res.source||'健康App')}）</div>
+        <div class="ocr-warn-comment">💬 ${esc(res.comment||'請上傳【今天】的最新步數截圖，村長才能幫您登記今天的散步點數喔！')}</div>
+        <div style="margin-top:8px;font-size:.85rem;color:#856404">💡 貼心提醒：請打開健康 App 確認停在「今天」，再重新截圖上傳一次唷！</div>
+      `;
+      SFX.warn();
+      return;
+    }
+
     if(steps>0){
       setSteps(steps);
       statusEl.className='step-ocr-status success';
       statusEl.innerHTML=`
-        <div class="ocr-ok-head">🎉 辨識成功！<b>${steps.toLocaleString()}</b> 步</div>
-        <div class="ocr-ok-sub">來源：${esc(res.source||'健康紀錄')}</div>
+        <div class="ocr-ok-head">🎉 今日步數辨識成功！<b>${steps.toLocaleString()}</b> 步</div>
+        <div class="ocr-ok-sub">日期：今天（${esc(res.recordDate||'今日')}） • 來源：${esc(res.source||'健康紀錄')}</div>
         <div class="ocr-ok-comment">💬 ${esc(res.comment||'今天走得真棒，活力充沛！')}</div>
       `;
       SFX.reward();
@@ -1916,7 +1984,7 @@ async function processStepImage(base64,mime){
       statusEl.className='step-ocr-status warn';
       statusEl.innerHTML=`
         <div>🤔 <b>村長沒在照片裡找到步數數字</b></div>
-        <small style="display:block;margin-top:4px">請確認照片有拍到數字（例如「步」或「steps」），或是點下方展開手動輸入步數喔！</small>
+        <small style="display:block;margin-top:4px">請確認照片有清楚拍到數字（例如「步」或「steps」），或是點下方展開手動輸入步數喔！</small>
       `;
       SFX.miss();
     }
@@ -1929,14 +1997,16 @@ async function processStepImage(base64,mime){
 }
 
 function makeSampleStepImage(){
+  const now=new Date();
+  const dateStr=(now.getMonth()+1)+'月'+now.getDate()+'日 (今天)';
   const c=document.createElement('canvas');c.width=480;c.height=300;
   const ctx=c.getContext('2d');
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,480,300);
   ctx.fillStyle='#f6f1e7';ctx.fillRect(0,0,480,50);
-  ctx.fillStyle='#2e362d';ctx.font='bold 20px sans-serif';ctx.fillText('❤️ 今日健康摘要',20,33);
+  ctx.fillStyle='#2e362d';ctx.font='bold 20px sans-serif';ctx.fillText('❤️ 今日健康摘要 · '+dateStr,20,33);
   ctx.fillStyle='#fa5252';ctx.beginPath();ctx.arc(56,150,28,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='#ffffff';ctx.font='bold 26px sans-serif';ctx.fillText('👟',42,160);
-  ctx.fillStyle='#868e96';ctx.font='16px sans-serif';ctx.fillText('今日步數 (Steps)',102,128);
+  ctx.fillStyle='#868e96';ctx.font='16px sans-serif';ctx.fillText('今日步數 (今天)',102,128);
   ctx.fillStyle='#212529';ctx.font='bold 42px sans-serif';ctx.fillText('6,850',102,176);
   ctx.fillStyle='#495057';ctx.font='18px sans-serif';ctx.fillText('步',235,176);
   ctx.fillStyle='#20c997';ctx.font='bold 15px sans-serif';ctx.fillText('✓ 已達成今日目標 80%',102,212);
