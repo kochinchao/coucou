@@ -1850,7 +1850,72 @@ function setSteps(n){
   if(gain)addPoints(gain,`🎉 今天走了 ${n.toLocaleString()} 步，獲得 ${gain} 點！`);else{SFX.tap();renderTasks();toast('已更新今天的步數')}
 }
 
-/* =============== 方案 2：AI 步數截圖 / 拍照自動辨識（嚴格核對今日日期） =============== */
+/* =============== 方案 2：AI 步數截圖 / 拍照自動辨識（自動壓縮防超時） =============== */
+function compressImage(file, maxDimension = 1200, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDimension || h > maxDimension) {
+          if (w > h) {
+            h = Math.round((h * maxDimension) / w);
+            w = maxDimension;
+          } else {
+            w = Math.round((w * maxDimension) / h);
+            h = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        const m = dataUrl.match(/^data:image\/jpeg;base64,(.+)$/);
+        resolve({ base64: m ? m[1] : null, mime: 'image/jpeg' });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function callGeminiApi(apiUrl, payload, retries = 1) {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      if ((res.status === 503 || res.status === 429) && i < retries) {
+        await new Promise(r => setTimeout(r, 1500));
+        continue;
+      }
+      const errTxt = await res.text();
+      throw new Error(`API ${res.status}: ${errTxt}`);
+    } catch (err) {
+      if (i < retries && !err.message.includes('400')) {
+        await new Promise(r => setTimeout(r, 1500));
+        continue;
+      }
+      throw err;
+    }
+  }
+}
+
+let lastStepImgData = null;
+
 async function analyzeStepWithGemini(base64,mime){
   const apiKey=atob('QVEuQWI4Uk42STZKMTBMdjFObGVXbW5MYVBYRWZScHNLVnhOcWhtQTNuZkpqUUxCUVdmeWc=');
   const apiUrl=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
@@ -1915,37 +1980,38 @@ async function analyzeStepWithGemini(base64,mime){
     }
   };
 
-  const res=await fetch(apiUrl,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload)
-  });
-  if(!res.ok)throw new Error('API error: '+res.status);
-  const data=await res.json();
+  const data=await callGeminiApi(apiUrl,payload,1);
   const raw=data?.candidates?.[0]?.content?.parts?.[0]?.text;
   return JSON.parse(raw);
 }
 
 async function handleStepImg(file){
   if(!file)return;
+  $('#stepImgIn').value='';
+  $('#stepCamIn').value='';
+
   const statusEl=$('#stepOcrStatus');
   statusEl.style.display='block';
   statusEl.className='step-ocr-status loading';
-  statusEl.innerHTML='<div class="ocr-spinner"></div><b>🔍 AI 正在看您的截圖或照片，辨識步數中…</b><small>支援 Apple健康、小米、三星或手環拍照</small>';
+  statusEl.innerHTML='<div class="ocr-spinner"></div><b>🔍 AI 正在處理並核對步數紀錄中…</b><small>自動輕量化壓縮，支援各廠牌健康App與手環</small>';
   SFX.tap();
 
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const dataUrl=e.target.result;
-    const m=dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
-    if(!m){
-      statusEl.className='step-ocr-status err';
-      statusEl.innerHTML='⚠️ 圖片格式不支援，請選擇一般相片或截圖。';
-      return;
+  try{
+    const compressed=await compressImage(file,1200,0.82);
+    if(!compressed||!compressed.base64){
+      throw new Error('圖片轉換失敗');
     }
-    await processStepImage(m[2],m[1]);
-  };
-  reader.readAsDataURL(file);
+    lastStepImgData=compressed;
+    await processStepImage(compressed.base64,compressed.mime);
+  }catch(err){
+    console.warn('Step upload error:',err);
+    statusEl.className='step-ocr-status err';
+    statusEl.innerHTML=`
+      <div>⚠️ <b>照片讀取未完成</b></div>
+      <div style="margin-top:6px"><button class="btn light" style="min-height:38px;padding:0 12px;font-size:.85rem" data-act="pickStepImg">重新選擇照片</button></div>
+    `;
+    SFX.miss();
+  }
 }
 
 async function processStepImage(base64,mime){
@@ -1991,7 +2057,11 @@ async function processStepImage(base64,mime){
   }catch(err){
     console.warn('Step OCR error:',err);
     statusEl.className='step-ocr-status err';
-    statusEl.innerHTML='⚠️ 雲端辨識忙碌中，您可以稍後再試，或點下方展開直接手動輸入步數。';
+    statusEl.innerHTML=`
+      <div>⚠️ <b>雲端辨識稍顯忙碌，連線超時</b></div>
+      <div style="margin-top:8px"><button class="btn light" style="min-height:38px;padding:0 14px;font-size:.88rem;font-weight:800;border-radius:10px;background:#fff;border:1.5px solid #d4c7b8" data-act="retryStepOcr">🔄 點此重新連線辨識</button></div>
+      <small style="display:block;margin-top:6px;color:#842029">您也可以稍後再試，或點下方展開直接手動輸入步數。</small>
+    `;
     SFX.miss();
   }
 }
@@ -2013,6 +2083,7 @@ function makeSampleStepImage(){
   const dataUrl=c.toDataURL('image/png');
   const m=dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
   SFX.tap();
+  lastStepImgData={base64:m[2],mime:m[1]};
   processStepImage(m[2],m[1]);
 }
 function lightUp(){const t=T();if(!t.lit){t.lit=true;saveT();addPoints(PTS.light,`💡 您家的燈亮了，鄰居都知道您平安！+${PTS.light} 點`)}}
@@ -2876,6 +2947,7 @@ const ACT={
   pickStepImg:()=>{SFX.tap();$('#stepImgIn').click()},
   takeStepPhoto:()=>{SFX.tap();$('#stepCamIn').click()},
   exampleStepImg:()=>makeSampleStepImage(),
+  retryStepOcr:()=>{if(lastStepImgData&&lastStepImgData.base64)processStepImage(lastStepImgData.base64,lastStepImgData.mime);else toast('請點上方按鈕選擇截圖或照片喔！')},
   askBuy:el=>askBuy(el.dataset.id),
   confirmBuy:el=>{closeDlg();buy(el.dataset.id)},
   closeReward:()=>{SFX.tap();closeRewardModal()},
