@@ -1853,58 +1853,80 @@ function setSteps(n){
 /* =============== 方案 2：AI 步數截圖 / 拍照自動辨識（自動壓縮防超時） =============== */
 function compressImage(file, maxDimension = 1200, quality = 0.82) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = reject;
-    reader.onload = e => {
-      const img = new Image();
-      img.onerror = reject;
-      img.onload = () => {
-        let w = img.width;
-        let h = img.height;
-        if (w > maxDimension || h > maxDimension) {
-          if (w > h) {
-            h = Math.round((h * maxDimension) / w);
-            w = maxDimension;
-          } else {
-            w = Math.round((w * maxDimension) / h);
-            h = maxDimension;
-          }
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        const m = dataUrl.match(/^data:image\/jpeg;base64,(.+)$/);
-        resolve({ base64: m ? m[1] : null, mime: 'image/jpeg' });
+    let url;
+    try {
+      url = URL.createObjectURL(file);
+    } catch (e) {
+      // Fallback to FileReader if createObjectURL fails
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = ev => {
+        const img = new Image();
+        img.onerror = reject;
+        img.onload = () => doResize(img);
+        img.src = ev.target.result;
       };
-      img.src = e.target.result;
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    const img = new Image();
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('圖片載入失敗')); };
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      doResize(img);
     };
-    reader.readAsDataURL(file);
+    img.src = url;
+
+    function doResize(sourceImg) {
+      let w = sourceImg.naturalWidth || sourceImg.width;
+      let h = sourceImg.naturalHeight || sourceImg.height;
+      if (w > maxDimension || h > maxDimension) {
+        if (w > h) {
+          h = Math.round((h * maxDimension) / w);
+          w = maxDimension;
+        } else {
+          w = Math.round((w * maxDimension) / h);
+          h = maxDimension;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(sourceImg, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      const m = dataUrl.match(/^data:image\/jpeg;base64,(.+)$/);
+      resolve({ base64: m ? m[1] : null, mime: 'image/jpeg' });
+    }
   });
 }
 
 async function callGeminiApi(apiUrl, payload, retries = 1) {
   for (let i = 0; i <= retries; i++) {
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = controller ? setTimeout(() => controller.abort(), 22000) : null;
     try {
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: controller ? controller.signal : undefined
       });
+      if (timeoutId) clearTimeout(timeoutId);
       if (res.ok) {
         return await res.json();
       }
+      const errTxt = await res.text();
       if ((res.status === 503 || res.status === 429) && i < retries) {
         await new Promise(r => setTimeout(r, 1500));
         continue;
       }
-      const errTxt = await res.text();
-      throw new Error(`API ${res.status}: ${errTxt}`);
+      throw new Error(`API ${res.status}: ${errTxt.slice(0, 100)}`);
     } catch (err) {
+      if (timeoutId) clearTimeout(timeoutId);
       if (i < retries && !err.message.includes('400')) {
         await new Promise(r => setTimeout(r, 1500));
         continue;
@@ -1982,7 +2004,14 @@ async function analyzeStepWithGemini(base64,mime){
 
   const data=await callGeminiApi(apiUrl,payload,1);
   const raw=data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  return JSON.parse(raw);
+  if(!raw){
+    throw new Error('未取得有效辨識結果');
+  }
+  let clean=raw.trim();
+  if(clean.startsWith('```')){
+    clean=clean.replace(/^```[a-zA-Z]*\n?/,'').replace(/```$/,'').trim();
+  }
+  return JSON.parse(clean);
 }
 
 async function handleStepImg(file){
@@ -2056,11 +2085,12 @@ async function processStepImage(base64,mime){
     }
   }catch(err){
     console.warn('Step OCR error:',err);
+    const curSteps=T().steps||0;
     statusEl.className='step-ocr-status err';
     statusEl.innerHTML=`
-      <div>⚠️ <b>雲端辨識稍顯忙碌，連線超時</b></div>
+      <div>⚠️ <b>雲端辨識稍顯忙碌或網路不穩</b></div>
       <div style="margin-top:8px"><button class="btn light" style="min-height:38px;padding:0 14px;font-size:.88rem;font-weight:800;border-radius:10px;background:#fff;border:1.5px solid #d4c7b8" data-act="retryStepOcr">🔄 點此重新連線辨識</button></div>
-      <small style="display:block;margin-top:6px;color:#842029">您也可以稍後再試，或點下方展開直接手動輸入步數。</small>
+      <small style="display:block;margin-top:6px;color:#842029">${curSteps?'目前今天已登錄 '+curSteps.toLocaleString()+' 步，隨時可以再次更新！':''}您也可以稍後再試，或點下方展開直接手動輸入步數。</small>
     `;
     SFX.miss();
   }
