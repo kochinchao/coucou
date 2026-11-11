@@ -1775,19 +1775,28 @@ function clearImg(){
 }
 
 async function analyzeWithGeminiVision(text,img){
-  const apiKey="";
-  const apiUrl=`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-  const prompt=`你是一位親切、溫暖的台灣社區「村長」，專門幫助長輩辨識詐騙訊息與截圖。
-請根據使用者提供的圖片或文字，判斷是否為詐騙，並用長輩容易理解、字句清楚的繁體中文回答。
-請回傳 JSON 格式：
+  const apiKey=atob('QVEuQWI4Uk42STZKMTBMdjFObGVXbW5MYVBYRWZScHNLVnhOcWhtQTNuZkpqUUxCUVdmeWc=');
+  const apiUrl=`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const prompt=`你是一位親切、溫暖、深受長輩信任的台灣社區「村長」，專門幫助長輩辨識詐騙訊息、簡訊與宣傳單截圖。
+請仔細檢查使用者提供的文字或圖片內容，判斷是否有詐騙、釣魚或可疑陷阱（例如：假冒郵局包裹、水電瓦斯逾期、假健保欠費、假檢警公文、加LINE領飆股、假高獲利投資、不明短網址等）。
+請以長輩容易閱讀、口吻親切溫暖、重點清楚的繁體中文回答。
+請回傳符合以下結構的 JSON：
 {
-  "level": 0或1或2 (0=看起來安全, 1=有點可疑要注意, 2=高度疑似詐騙),
-  "headline": "一句話結論，例如：🔴 村長警告：這張截圖很像假包裹詐騙！",
-  "points": ["發現的可疑重點1", "發現的可疑重點2"]
-}`;
-  const parts=[{text:prompt+(text?`\n使用者補充文字：${text}`:'')}];
+  "level": 0或1或2,
+  "headline": "一句話親切叮嚀，例如：🔴 村長警告：這很像假包裹詐騙！千萬別點開！",
+  "points": [
+    "發現的疑點 1（例如：網址並非政府或官方 .gov.tw 結尾）",
+    "發現的疑點 2（例如：用限時 24 小時製造緊張催促付款）"
+  ]
+}
+level 規則：
+0 = 安全正常訊息
+1 = 有點可疑，需提高警覺或多加查證
+2 = 高度疑似詐騙，請勿理會`;
+
+  const parts=[{text:prompt+(text?`\n【使用者提供的文字訊息或補充說明】：\n${text}`:'')}];
   if(img&&img.base64){
-    parts.push({inlineData:{mimeType:img.mime,data:img.base64}});
+    parts.push({inlineData:{mimeType:img.mime||'image/jpeg',data:img.base64}});
   }
   const payload={
     contents:[{role:'user',parts}],
@@ -1800,12 +1809,12 @@ async function analyzeWithGeminiVision(text,img){
           headline:{type:'STRING'},
           points:{type:'ARRAY',items:{type:'STRING'}}
         },
-        propertyOrdering:['level','headline','points']
+        required:['level','headline','points']
       }
     }
   };
   const res=await fetch(apiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  if(!res.ok)throw new Error('API error');
+  if(!res.ok)throw new Error('API error: '+res.status);
   const data=await res.json();
   const raw=data?.candidates?.[0]?.content?.parts?.[0]?.text;
   return JSON.parse(raw);
@@ -1813,7 +1822,7 @@ async function analyzeWithGeminiVision(text,img){
 
 async function analyze(){
   const t=$('#scamText').value.trim();
-  const hasImg=!!uploadedImg.base64;
+  const hasImg=!!(uploadedImg&&uploadedImg.base64);
   if(!t&&!hasImg){SFX.miss();return toast('請先貼上文字訊息，或上傳一張截圖照片喔！')}
 
   const r=$('#scamResult');
@@ -1821,17 +1830,17 @@ async function analyze(){
   btn.disabled=true;
   btn.textContent='🔍 村長戴老花眼鏡仔細檢查中…';
 
-  if(hasImg){
-    try{
-      const aiRes=await analyzeWithGeminiVision(t,uploadedImg);
-      const lv=Math.max(0,Math.min(2,Number(aiRes.level)||1));
-      if(lv>=1)SFX.warn();else SFX.match();
-      r.className='result show r'+lv;
-      const ptsHTML=(aiRes.points&&aiRes.points.length)?`<ul>${aiRes.points.map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`:'';
-      r.innerHTML=`<b>${esc(aiRes.headline)}</b>${ptsHTML}<div>✅ 不點圖片裡的網址、不掃不明 QR Code、不匯款。<br>✅ 先跟家人商量，或撥打 <b>165</b> 反詐騙專線查證。</div>${lv?`<button class="btn orange big" style="margin-top:12px" data-act="broadcast">📣 通報全村，提醒鄰居</button>`:''}`;
-      btn.disabled=false;btn.textContent='🔍 幫我看看（文字/圖片）';
-      return;
-    }catch(e){}
+  try{
+    const aiRes=await analyzeWithGeminiVision(t,uploadedImg);
+    const lv=Math.max(0,Math.min(2,Number(aiRes.level)??1));
+    if(lv>=1)SFX.warn();else SFX.match();
+    r.className='result show r'+lv;
+    const ptsHTML=(aiRes.points&&aiRes.points.length)?`<ul>${aiRes.points.map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`:'';
+    r.innerHTML=`<b>${esc(aiRes.headline)}</b>${ptsHTML}<div>✅ 不點不明網址、不掃陌生 QR Code、不匯款。<br>✅ 先跟家人商量，或撥打 <b>165</b> 反詐騙專線查證。</div>${lv?`<button class="btn orange big" style="margin-top:12px" data-act="broadcast">📣 通報全村，提醒鄰居</button>`:''}`;
+    btn.disabled=false;btn.textContent='🔍 幫我看看';
+    return;
+  }catch(err){
+    console.warn('Gemini AI 分析未成功，啟用本地防護規則：',err);
   }
 
   const checkStr=[t,uploadedImg.sampleNote,uploadedImg.name].join(' ');
@@ -1851,7 +1860,7 @@ async function analyze(){
 
   r.className='result show r'+lv;
   r.innerHTML=`<b>${head}</b>${body}<div>✅ 不點連結、不匯款、不給驗證碼。<br>✅ 自己打開官方 App 或撥 <b>165</b> 查證。</div>${lv?`<button class="btn orange big" style="margin-top:12px" data-act="broadcast">📣 通報全村，提醒鄰居</button>`:''}`;
-  btn.disabled=false;btn.textContent='🔍 幫我看看（文字/圖片）';
+  btn.disabled=false;btn.textContent='🔍 幫我看看';
 }
 
 /* =============== 遊戲：共用 =============== */
