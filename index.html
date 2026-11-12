@@ -1024,9 +1024,9 @@ input,textarea{
         <div class="stepbar"><i id="stepBar"></i><u style="left:37.5%"></u><u style="left:62.5%"></u></div>
         <div class="tiers" id="tiers"></div>
 
-        <!-- 方案 2：健康 App 截圖 / 手環拍照 AI 自動辨識 -->
+        <!-- 上傳/拍照 今日的步數 AI 自動辨識 -->
         <div class="step-ocr-box">
-          <div class="step-ocr-title">📷 方案 2：AI 步數辨識（免開螢幕，全天自動算）</div>
+          <div class="step-ocr-title">📷 上傳/拍照 今日的步數</div>
           <input type="file" id="stepImgIn" accept="image/*" hidden>
           <input type="file" id="stepCamIn" accept="image/*" capture="environment" hidden>
           <div class="step-ocr-btns">
@@ -1041,19 +1041,6 @@ input,textarea{
           </div>
           <div class="step-ocr-status" id="stepOcrStatus" style="display:none"></div>
         </div>
-
-        <!-- 手動修改/輸入（折疊備用） -->
-        <details class="step-manual-details">
-          <summary>也可以直接手動輸入或測試 ▾</summary>
-          <div class="step-in" style="margin-top:8px">
-            <input id="stepIn" type="number" inputmode="numeric" min="0" max="100000" placeholder="手動輸入今天步數" aria-label="今天的步數">
-            <button class="btn" data-act="stepSave">更新</button>
-          </div>
-          <div style="display:flex;gap:12px;justify-content:center;margin-top:6px;flex-wrap:wrap">
-            <button class="link" style="margin:0" data-act="exampleStepImg">🧪 測試：載入範例截圖 (6,850步)</button>
-            <button class="link" style="margin:0" data-act="stepAdd">示範：+1,000步</button>
-          </div>
-        </details>
       </article>
 
       <article class="card task"><div class="task-h"><div class="task-ico">🧠</div><div><h3>動動腦</h3><p>玩一款遊戲 +15 點</p></div><div class="state" id="gameState"></div></div><div style="margin-top:12px"><button class="btn light big" data-act="go" data-p="games">去玩遊戲</button></div></article>
@@ -2082,7 +2069,7 @@ async function processStepImage(base64,mime){
       statusEl.className='step-ocr-status warn';
       statusEl.innerHTML=`
         <div>🤔 <b>村長沒在照片裡找到步數數字</b></div>
-        <small style="display:block;margin-top:4px">請確認照片有清楚拍到數字（例如「步」或「steps」），或是點下方展開手動輸入步數喔！</small>
+        <small style="display:block;margin-top:4px">請確認照片有清楚拍到數字（例如「步」或「steps」），再重新上傳一張唷！</small>
       `;
       SFX.miss();
     }
@@ -2093,7 +2080,7 @@ async function processStepImage(base64,mime){
     statusEl.innerHTML=`
       <div>⚠️ <b>雲端辨識稍顯忙碌或網路不穩</b></div>
       <div style="margin-top:8px"><button class="btn light" style="min-height:38px;padding:0 14px;font-size:.88rem;font-weight:800;border-radius:10px;background:#fff;border:1.5px solid #d4c7b8" data-act="retryStepOcr">🔄 點此重新連線辨識</button></div>
-      <small style="display:block;margin-top:6px;color:#842029">${curSteps?'目前今天已登錄 '+curSteps.toLocaleString()+' 步，隨時可以再次更新！':''}您也可以稍後再試，或點下方展開直接手動輸入步數。</small>
+      <small style="display:block;margin-top:6px;color:#842029">${curSteps?'目前今天已登錄 '+curSteps.toLocaleString()+' 步，隨時可以再次更新！':''}您也可以稍後再試一次。</small>
     `;
     SFX.miss();
   }
@@ -2975,7 +2962,7 @@ const ACT={
   shopCat:el=>{curShopCat=el.dataset.c;SFX.tap();renderShop()},
   removeFriendAsk:()=>{$('#removeConfirmBox').style.display='block';SFX.tap()},
   removeFriendDo:el=>{const f=S.friends.find(x=>x.id===el.dataset.id);if(f){if(CLOUD.ready)callFn('removeFriend',{uid:f.id}).catch(()=>{});S.friends=S.friends.filter(x=>x.id!==f.id);write('friends',S.friends);closeDlg();renderStreet(false);toast(`已移除鄰居「${f.name}」`)}},
-  stepSave:()=>setSteps($('#stepIn').value),
+  stepSave:()=>{const el=$('#stepIn');if(el)setSteps(el.value)},
   stepAdd:()=>setSteps((T().steps||0)+1000),
   pickStepImg:()=>{SFX.tap();$('#stepImgIn').click()},
   takeStepPhoto:()=>{SFX.tap();$('#stepCamIn').click()},
