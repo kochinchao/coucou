@@ -1062,23 +1062,27 @@ input,textarea{
       <div id="gameHub"></div>
     </section>
 
-    <!-- 村長 -->
+    <!-- 村長防詐 -->
     <section class="page" id="page-mayor">
-      <div class="page-head"><div class="kicker">有疑問，咱們一起看看</div><h1>村長的提醒 🛡️</h1><p>遇到不確定的訊息或照片，先停一下再查證。</p></div>
+      <div class="page-head">
+        <div class="kicker">AI 智慧辨識・安心防詐小幫手</div>
+        <h1>村長幫您防詐騙 🛡️</h1>
+        <p>懷疑是詐騙？傳給村長看，安心不踩雷！</p>
+      </div>
       <div class="card box">
-        <h2>把訊息或截圖拿來給村長看看</h2>
-        <p>您可以貼上文字訊息，或是直接上傳手機截圖、拍下傳單照片，村長幫您檢查哪裡怪怪的。請不要貼上密碼或驗證碼。</p>
+        <h2>查證可疑訊息或截圖</h2>
+        <p>貼上文字或傳截圖照片，村長立刻幫您檢查是不是詐騙！（請勿貼上密碼或私密個資）</p>
         
-        <textarea id="scamText" placeholder="方式一：在這裡貼上收到的文字訊息，例如：包裹未領，請點連結補繳運費……"></textarea>
+        <textarea id="scamText" placeholder="在此貼上收到的可疑訊息（例如：包裹未領點此補繳、假中獎通知、冒充公家機關等）"></textarea>
         
         <!-- 圖片與截圖上傳區 -->
         <div class="upload-zone">
-          <div style="font-weight:800;margin-bottom:8px;color:var(--green-d)">📷 方式二：上傳截圖或拍照辨識</div>
+          <div style="font-weight:800;margin-bottom:8px;color:var(--green-d)">📷 或是傳圖片／拍照檢查</div>
           <input type="file" id="scamImgIn" accept="image/*" hidden>
           <input type="file" id="scamCamIn" accept="image/*" capture="environment" hidden>
           <div class="upload-btns">
-            <button class="btn light" data-act="pickImg">🖼️ 選手機截圖 / 照片</button>
-            <button class="btn light" data-act="takePhoto">📸 直接拍照</button>
+            <button class="btn light" data-act="pickImg">🖼️ 傳簡訊/LINE截圖</button>
+            <button class="btn light" data-act="takePhoto">📸 拍紙本傳單</button>
           </div>
           <div class="img-preview-wrap" id="imgPreviewWrap">
             <img id="imgPreview" alt="已上傳的截圖預覽">
@@ -1088,14 +1092,14 @@ input,textarea{
         </div>
 
         <div class="scam-actions">
-          <button class="btn big" id="analyzeBtn" data-act="analyze">🔍 幫我看看</button>
+          <button class="btn big" id="analyzeBtn" data-act="analyze">🔍 幫我檢查是不是詐騙</button>
           <div class="scam-sub-btns">
             <button class="btn light" data-act="example">文字範例</button>
             <button class="btn light" data-act="exampleImg">截圖範例</button>
           </div>
         </div>
         <div class="result" id="scamResult"></div>
-        <div class="hintbox" style="margin-top:14px">覺得可疑時，請先別點連結、別匯款，隨時撥打 <b>165</b> 反詐騙專線確認。</div>
+        <div class="hintbox" style="margin-top:14px">🛡️ <b>防詐小叮嚀</b>：只要遇到「要求點網址連結、匯款、索取驗證碼」，先別動作！可隨時撥打 <b>165</b> 反詐騙專線查證。</div>
       </div>
     </section>
 
@@ -2191,7 +2195,7 @@ function handleImgFile(file){
       $('#imgNameLabel').textContent=`已選取：${uploadedImg.name}`;
       $('#imgPreviewWrap').classList.add('show');
       SFX.match();
-      toast('📸 圖片已放上來，點「幫我看看」請村長檢查！');
+      toast('📸 圖片已放上來，點「幫我檢查是不是詐騙」！');
     }
   };
   reader.readAsDataURL(file);
@@ -2297,7 +2301,7 @@ async function analyze(){
     r.className='result show r'+lv;
     const ptsHTML=(aiRes.points&&aiRes.points.length)?`<ul>${aiRes.points.map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`:'';
     r.innerHTML=`<b>${esc(aiRes.headline)}</b>${ptsHTML}<div>✅ 不點不明網址、不掃陌生 QR Code、不匯款。<br>✅ 先跟家人商量，或撥打 <b>165</b> 反詐騙專線查證。</div>${lv?`<button class="btn orange big" style="margin-top:12px" data-act="broadcast">📣 通報全村，提醒鄰居</button>`:''}`;
-    btn.disabled=false;btn.textContent='🔍 幫我看看';
+    btn.disabled=false;btn.textContent='🔍 幫我檢查是不是詐騙';
     return;
   }catch(err){
     console.warn('Gemini AI 分析未成功，啟用本地防護規則：',err);
@@ -2320,7 +2324,7 @@ async function analyze(){
 
   r.className='result show r'+lv;
   r.innerHTML=`<b>${head}</b>${body}<div>✅ 不點連結、不匯款、不給驗證碼。<br>✅ 自己打開官方 App 或撥 <b>165</b> 查證。</div>${lv?`<button class="btn orange big" style="margin-top:12px" data-act="broadcast">📣 通報全村，提醒鄰居</button>`:''}`;
-  btn.disabled=false;btn.textContent='🔍 幫我看看';
+  btn.disabled=false;btn.textContent='🔍 幫我檢查是不是詐騙';
 }
 
 /* =============== 遊戲：共用 =============== */
