@@ -553,6 +553,9 @@ textarea{width:100%;min-height:120px;border:2px solid #d8d1c0;border-radius:16px
 .img-clear{margin-top:8px;display:inline-flex;align-items:center;gap:4px;padding:6px 14px;border-radius:99px;background:#fde0d6;color:#983716;font-weight:800;font-size:.9rem}
 .rowbtn{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
 .rowbtn .btn{flex:1}
+.scam-actions{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.scam-sub-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.scam-sub-btns .btn{width:100%;min-height:48px;font-size:1rem}
 .result{display:none;margin-top:14px;border-radius:16px;padding:16px;line-height:1.8}
 .result.show{display:block}
 .result.r0{background:#e9f3e3}.result.r1{background:#fff2cf}.result.r2{background:#fde0d6}
@@ -1082,10 +1085,12 @@ input,textarea{
           </div>
         </div>
 
-        <div class="rowbtn">
-          <button class="btn" id="analyzeBtn" data-act="analyze">🔍 幫我看看</button>
-          <button class="btn light" data-act="example">看文字範例</button>
-          <button class="btn light" data-act="exampleImg">看截圖範例</button>
+        <div class="scam-actions">
+          <button class="btn big" id="analyzeBtn" data-act="analyze">🔍 幫我看看</button>
+          <div class="scam-sub-btns">
+            <button class="btn light" data-act="example">文字範例</button>
+            <button class="btn light" data-act="exampleImg">截圖範例</button>
+          </div>
         </div>
         <div class="result" id="scamResult"></div>
         <div class="hintbox" style="margin-top:14px">覺得可疑時，請先別點連結、別匯款，隨時撥打 <b>165</b> 反詐騙專線確認。</div>
@@ -1101,7 +1106,7 @@ input,textarea{
       <div class="card inv">
         <h2>🏡 我的家與收藏（共 <span id="myItemCount">0</span> 件）</h2>
         <div class="pills" id="inventory"></div>
-        <p class="small-note">購買的所有物品都會放進「我的家」！點進「我的家」可以自由移動位置、轉送給鄰居，或回收換回 30% 點數。</p>
+        <p class="small-note">購買的所有物品都會放進「我的家」！點進「我的家」可以自由移動位置、轉送給鄰居，或回收換回 10% 點數。</p>
         <button class="btn light big" style="margin-top:10px" data-act="openMineBtn">🏠 去我的家整理 / 送禮 / 回收</button>
       </div>
     </section>
@@ -1660,14 +1665,14 @@ function knock(id){
   renderTasks();
 }
 
-/* 我的家：自由拖曳移動、送給朋友、30%點數回收、切換外出中狀態 */
+/* 我的家：自由拖曳移動、送給朋友、10%點數回收、切換外出中狀態 */
 let selectedItemUid=null;
 function openMine(){
   if(selectedItemUid&&!S.myItems.some(x=>x.uid===selectedItemUid))selectedItemUid=null;
   if(!selectedItemUid&&S.myItems.length)selectedItemUid=S.myItems[S.myItems.length-1].uid;
   const selItem=S.myItems.find(x=>x.uid===selectedItemUid);
   const selProd=selItem?PRODUCTS.find(x=>x.id===selItem.id):null;
-  const refund=selProd?Math.max(1,Math.round(selProd.price*0.3)):0;
+  const refund=selProd?Math.max(1,Math.round(selProd.price*0.1)):0;
 
   const itemsHTML=S.myItems.map(it=>{
     const p=PRODUCTS.find(x=>x.id===it.id)||{icon:'🎁',name:'物品'};
@@ -1685,7 +1690,7 @@ function openMine(){
     <div class="item-ctrl" id="itemCtrlBox" style="display:${selProd?'block':'none'}">
       <div class="item-ctrl-head">
         <span id="ctrlIcon" style="font-size:2.2rem">${selProd?selProd.icon:''}</span>
-        <div><b id="ctrlName">${selProd?esc(selProd.name):''}</b><div id="ctrlRefund" style="font-size:.86rem;color:var(--sub)">${selProd?`原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)`:''}</div></div>
+        <div><b id="ctrlName">${selProd?esc(selProd.name):''}</b><div id="ctrlRefund" style="font-size:.86rem;color:var(--sub)">${selProd?`原價 ${selProd.price} 點・回收可得 ${refund} 點 (10%)`:''}</div></div>
       </div>
 
       <div class="item-ctrl-btns">
@@ -1712,11 +1717,11 @@ function selectRoomItem(uid) {
     return;
   }
   ctrlBox.style.display = 'block';
-  const refund = Math.max(1, Math.round(selProd.price * 0.3));
+  const refund = Math.max(1, Math.round(selProd.price * 0.1));
   const curScale = selItem.scale || 1.0;
   $('#ctrlIcon').textContent = selProd.icon;
   $('#ctrlName').textContent = selProd.name;
-  $('#ctrlRefund').textContent = `原價 ${selProd.price} 點・回收可得 ${refund} 點 (30%)`;
+  $('#ctrlRefund').textContent = `原價 ${selProd.price} 點・回收可得 ${refund} 點 (10%)`;
   const sendBtn = $('[data-act="showSendItem"]');
   if (sendBtn) sendBtn.dataset.uid = uid;
   const recycleBtn = $('[data-act="recycleItem"]');
@@ -2951,11 +2956,11 @@ const ACT={
   recycleItem:el=>{
     const idx=S.myItems.findIndex(x=>x.uid===el.dataset.uid);if(idx<0)return;
     const it=S.myItems.splice(idx,1)[0],p=PRODUCTS.find(x=>x.id===it.id);
-    const refund=p?Math.max(1,Math.round(p.price*0.3)):10;
+    const refund=p?Math.max(1,Math.round(p.price*0.1)):5;
     selectedItemUid=S.myItems.length?S.myItems[S.myItems.length-1].uid:null;
     write('myItems',S.myItems);
     S.points+=refund;write('points',S.points);syncPoints();renderShop();openMine();SFX.reward();
-    toast(`♻️ 已回收「${p?p.name:'物品'}」，退還 ${refund} 點 (30%)！`);
+    toast(`♻️ 已回收「${p?p.name:'物品'}」，退還 ${refund} 點 (10%)！`);
   },
   openMineBtn:()=>{SFX.tap();openMine()},
   goShopFromHome:()=>{closeDlg();go('shop')},
